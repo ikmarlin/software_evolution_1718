@@ -9,9 +9,9 @@ import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import lang::java::\syntax::Java15;
 import Main;
+import Extractor;
 import metrics::SigModelScale;
 import metrics::CalculateLOC;
-
 
 /* Based on java KLOC ranking for Volume of a project, get the sig scale string
 	
@@ -37,19 +37,28 @@ public str getVolumeRanking(int numLines) {
 }
 
 
-/* calculate volume */
-public int getVolume(M3 model) {
+/* calculate volume/classes - Halstead volume*/
+public int getVolumeAllClasses(M3 model) {
 	list[loc] cls = extractClasses(model);
 	return toInt(sum(mapper(cls, countLOCFile)));
 }
 
+/* calculate volume/files */
+public int getVolumeAllFiles(loc project, list[str] paths, str fileExt) {
+	list[loc] files = extractFiles(smallsql, paths, fileExt);
+	return toInt(sum(mapper(files, countLOCFile)));
+}
 
 /*
-1)
-	rascal>getVolumeRanking(getVolume(smallModel));
+	rascal>getVolumeAllClasses(smallModel);
+	int: 23673
+	
+	rascal>getVolumeAllFiles(smallsql, ["junit"], "java");
+	int: 24048
+	
+	rascal>getVolumeRanking(getVolumeAllClasses(smallModel));
 	str: "++"
 
-2)
 	rascal>getVolumeRanking(getVolume(hsModel));
 	str: "+"
 */

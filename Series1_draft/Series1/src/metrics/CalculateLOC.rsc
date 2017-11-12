@@ -15,8 +15,11 @@ import utils::Tools;
 public int countLOCFile(loc f) = size(getLOCFile(f));
 
 public list[str] getLOCFile(loc f) {
-	str content = eraseComments(readFile(f)); // get rid of comments
+	str content = eraseOneLineComment(readFile(f)); // get rid of comments
+	content = eraseBlockComment(content); // get rid of comments
+	//println ("file after comments omitted: <content>");
 	content = eraseEmptyLines(content); // get rid of empty lines
+	//println ("file after empty lines omitted: <content>");
 	list[str] locf  = [s | s <- split(newLine, content), !(/^\s*$/ := s)];
 	return locf;
 }

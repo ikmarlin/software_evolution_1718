@@ -20,16 +20,25 @@ public int countLines(str s){
   return count;
 }
 
-public str eraseComments(str s) {
-	return visit(s) {
-		case /\/\/.*/ => ""
-		case /\/\*.*?\*\//s => ""
+public str eraseOneLineComment(str content) {
+	//println ("String: <s>");
+	return visit(content) {
+		case /^[\n\t ]*\/\/.*/ => ""
 	}
 }
 
-public str eraseEmptyLines(str s) {
-    return visit(s) {
-        case /^\n[ \t\n]*\n/ => "\n"  
+public str eraseBlockComment(str content) {
+	//println ("String: <s>");
+	return visit(content) {
+		case /\/\*.*?\*\//s => ""
+		case /\/\*[\s\S]*?\*\// => ""
+	}
+}
+
+public str eraseEmptyLines(str content) {
+	//println ("String: <s>");
+    return visit(content) {
+        case /^\n[\n\t ]*\n/ => "\n"  
     }
 }
 
