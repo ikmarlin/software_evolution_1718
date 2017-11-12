@@ -21,35 +21,36 @@ import metrics::CalculateUnitSize;
 	21-50 	complex, high risk
 	 > 50  untestable, very high risk
 	 
-	 rascal>cyclomaticComplexityUnit(smallModel);
+	 rascal>getComplexityRisksPercentages(smallModel);
 	 ComplexityRisksPercentages: <38.0934313500,15.6082523100,24.9845862000,21.3137301400>
 */
 
-alias ComplexityRisksPercentages = tuple[real simple, real moderate, real highk, real veryHigh];
+alias ComplexityRisksPercentages = tuple[real simple, real moderate, real high, real veryHigh];
 
-public ComplexityRisksPercentages cyclomaticComplexityUnit(M3 model) {
+public ComplexityRisksPercentages getComplexityRisksPercentages(M3 model) {
 // we need to categorize unit-size values between 4 different categories according to the definition of Cyclomatic complexity */
 	list [int] unitSizeList = getUnitSize(model);
 	int simple = sum([unitSize | unitSize <- unitSizeList, unitSize <= 10]);
 	int moderate = sum([unitSize | unitSize <- unitSizeList, unitSize > 10 && unitSize <= 20]);
 	int high = sum([unitSize | unitSize <- unitSizeList, unitSize > 20 && unitSize <= 50]);
 	int veryHigh = sum([unitSize | unitSize <- unitSizeList, unitSize > 50]);
+	
 	// get total of all
 	int totalUnitSize = simple + moderate + high + veryHigh;
 	
 	// get ratio per category of unit-size
-	real ccSimple = toReal(simple)/toReal(totalUnitSize)*100;
-	real ccModerate = toReal(moderate)/toReal(totalUnitSize)*100;
-	real ccHigh = toReal(high)/toReal(totalUnitSize)*100;
-	real ccVeryHigh = toReal(veryHigh)/toReal(totalUnitSize)*100;
+	real prctSimple = toReal(simple)/toReal(totalUnitSize)*100;
+	real prctModerate = toReal(moderate)/toReal(totalUnitSize)*100;
+	real prctHigh = toReal(high)/toReal(totalUnitSize)*100;
+	real prctVeryHigh = toReal(veryHigh)/toReal(totalUnitSize)*100;
 	
 	// return the calculated rations
-	return <ccSimple, ccModerate, ccHigh, ccVeryHigh>;
+	return <prctSimple, prctModerate, prctHigh, prctVeryHigh>;
 }
 
 
 
-/*
+/* now, we can calculate the unit complexity rating of a project
 	     maximum relative LOC
 	#    #####################
 	rank# moderate high very-high
@@ -58,4 +59,21 @@ public ComplexityRisksPercentages cyclomaticComplexityUnit(M3 model) {
 	 o      40%     10%   0%
 	 -      50%     15%   5%
 	 --      -       -     -
+	 
+	 rascal>getUnitComplexityRanking(getComplexityRisksPercentages(smallModel));
+	str: "--"
 */
+
+// sigScales = ["++", "+", "o", "-", "--"]; 
+public str getUnitComplexityRanking(ComplexityRisksPercentages crPercentages) {
+	real simple = crPercentages.simple;
+	real moderate = crPercentages.moderate;
+	real high = crPercentages.high;
+	real veryHigh = crPercentages.veryHigh;
+	
+	if(simple <=25 && high == 0 && veryHigh == 0) return sigScales[0]; // ++
+	else if(simple <=30 && high <=5 && veryHigh == 0) return sigScales[1]; // +
+	else if(simple <=40 && high <=10 && veryHigh == 0) return sigScales[2]; // o
+	else if(simple <=50 && high <=15 && veryHigh <=5) return sigScales[3]; // -
+	else return sigScales[4]; // --
+}
