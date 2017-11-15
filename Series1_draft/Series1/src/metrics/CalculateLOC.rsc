@@ -24,7 +24,19 @@ public list[str] getLOCFile(loc f) {
 	return locf;
 }
 
-//content = eraseCurlyBraces(content);
+/* LOC count per file without curly braces */
+public int countLOCFileNoCurlyBraces(loc f) = size(getLOCFileNoCurlyBraces(f));
+public list[str] getLOCFileNoCurlyBraces(loc f) {
+	str content = eraseOneLineComment(readFile(f)); // get rid of comments
+	content = eraseBlockComment(content); // get rid of comments
+	//println ("file after comments omitted: <content>");
+	content = eraseEmptyLines(content); // get rid of empty lines
+	//println ("file after empty lines omitted: <content>");
+	content = eraseCurlyBraces(content); // get rid of curly braces
+	//println ("file after {} omitted: <content>");
+	list[str] locf  = [s | s <- split(newLine, content), !(/^\s*$/ := s)];
+	return locf;
+}
 
 /* LOC count per unit (method) */
 public int countLOCUnit(loc f) = size(getLOCUnit(f));

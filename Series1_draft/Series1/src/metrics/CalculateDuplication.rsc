@@ -26,34 +26,35 @@ import metrics::SigModelScale;
 	- 		10-20%
 	-- 		20-100%
 	rascal>getCountLOCDuplication(smallModel);
-	int: 890
+	int: 892
 	
 	rascal>getDuplicationRatio(smallModel);
-	real: 4.22101019700
+	real: 4.23049561300
 	
-	rascal>getDuplicationRanking(4.22101019700);
+	rascal>getDuplicationRanking(getDuplicationRatio(smallModel));
 	str: "+"
 */
 
-public int getCountLOCDuplication(M3 model) {
-	blocksOver6Lines = [];
-	for (l <- extractMethods(model)) {
-		list[str] content = getLOCFile(l); // method LOC
+public int getCountLOCDuplication(loc project) {
+	blocksOf6Lines = [];
+	//println("<extractFiles(project)>");
+	for (l <- extractFiles(project)) {
+		list[str] content = getLOCFileNoCurlyBraces(l); // method LOC
+		//println("<content> <size(content)>");
 		if (size(content) >= 6){
 		// for methods of loc >=6 excluding comment blocks, empty lines and white-spaces, we store all possible blocks
-			blocksOver6Lines += [[l1,l2,l3,l4,l5,l6] | [_*,l1,l2,l3,l4,l5,l6,_*] := zip(content, index(content), [l | i <- [0..size(content)]])];
+			blocksOf6Lines += [[l1,l2,l3,l4,l5,l6] | [_*,l1,l2,l3,l4,l5,l6,_*] := zip(content, index(content), [l | i <- [0..size(content)]])];
 		}
 	}
 	storage = ();
 	dups = [];
-	for (b <- blocksOver6Lines) {
+	for (b <- blocksOf6Lines) {
 		// extract lines from block
 		content = [line | <line,i,l> <- b];
 		// check whether the sequencial lines of that block exists elsewhere, if yes register it as duplicate, otherwlse  add it
 		if (!(content in storage)) {
 			storage[content] = b;
 		} else {
-			dups += {lineData | lineData <- storage[content]};
 			dups += {lineData | lineData <- b};
 		}
 	}

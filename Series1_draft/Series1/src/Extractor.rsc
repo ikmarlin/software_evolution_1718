@@ -16,7 +16,7 @@ import metrics::CalculateLOC;
 
 
 /* get files from a java project */
-public list[loc] extractFiles(loc project, list[str] paths, str fileExt) =
+public list[loc] extractSpecificFiles(loc project, list[str] paths, str fileExt) =
 	[f | path <- paths, /file(f) <- crawl(project), f.extension == fileExt && f.path != path];
 // rascal>extractFiles(smallsql, ["junit"], "java");
 
@@ -56,8 +56,8 @@ public void statementsInMethod(loc location) {
 	};
 }
 
-public list[loc] extractFiles_(loc project) =
+public list[loc] extractFiles(loc project) =
 	[f | /file(f) <- crawl(project)];
 	
-public int lengthExtractFiles_(loc project) =
+public int lengthExtractFiles(loc project) =
 	size([f | /file(f) <- crawl(project)]);
