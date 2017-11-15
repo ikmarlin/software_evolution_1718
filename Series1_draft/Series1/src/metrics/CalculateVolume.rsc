@@ -6,7 +6,6 @@ import List;
 import util::Math;
 import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
-import lang::java::m3::AST;
 import lang::java::\syntax::Java15;
 import Main;
 import Extractor;
@@ -45,7 +44,7 @@ public int getVolumeAllClasses(M3 model) {
 
 /* calculate volume/files */
 public int getVolumeAllFiles(loc project, list[str] paths, str fileExt) {
-	list[loc] files = extractFiles(smallsql, paths, fileExt);
+	list[loc] files = extractFiles(project, paths, fileExt);
 	return toInt(sum(mapper(files, countLOCFile)));
 }
 
@@ -59,6 +58,6 @@ public int getVolumeAllFiles(loc project, list[str] paths, str fileExt) {
 	rascal>getVolumeRanking(getVolumeAllClasses(smallModel));
 	str: "++"
 
-	rascal>getVolumeRanking(getVolume(hsModel));
+	rascal>getVolumeRanking(getVolumeAllClasses(hsModel));
 	str: "+"
 */

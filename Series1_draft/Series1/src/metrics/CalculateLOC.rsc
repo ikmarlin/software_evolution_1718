@@ -9,11 +9,11 @@ import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import lang::java::\syntax::Java15;
+import Extractor;
 import utils::Tools;
 
 /* LOC count per file */
 public int countLOCFile(loc f) = size(getLOCFile(f));
-
 public list[str] getLOCFile(loc f) {
 	str content = eraseOneLineComment(readFile(f)); // get rid of comments
 	content = eraseBlockComment(content); // get rid of comments
@@ -27,3 +27,5 @@ public list[str] getLOCFile(loc f) {
 /* LOC count per unit (method) */
 public int countLOCUnit(loc f) = size(getLOCUnit(f));
 public list[int] getLOCUnit(M3 model) = mapper(methods(Model), getLOCFile);
+
+public list[str] extractAllLines(M3 model) = [trim(l) | m <- extractMethods(model), l <-  getLOCFile(m)];

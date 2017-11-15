@@ -8,10 +8,11 @@ import Map;
 import util::FileSystem;
 import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
-import lang::java::m3::AST;
 import lang::java::\syntax::Java15;
+import lang::java::m3::AST;
 import Main;
 import utils::Tools;
+import metrics::CalculateLOC;
 
 
 /* get files from a java project */
@@ -31,14 +32,13 @@ public list[loc] extractMethods(M3 model) {
 		//println("<l>");
 		statementsInMethod(l);
 	}
-	return methodslocs;
+	return toList(methodslocs);
 }
 	
 /*
 extractFiles(smallsql, ["junit", "tool"], "java");
 extractFiles(smallsql, ["junit"], "java");
 
-filterExtractedMethods(smallModel, ["junit"], "java");
 */
 
 
@@ -55,3 +55,9 @@ public void statementsInMethod(loc location) {
     	println(" for statement found\n"); } 
 	};
 }
+
+public list[loc] extractFiles_(loc project) =
+	[f | /file(f) <- crawl(project)];
+	
+public int lengthExtractFiles_(loc project) =
+	size([f | /file(f) <- crawl(project)]);
