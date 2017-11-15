@@ -19,6 +19,7 @@ public list[str] getLOCFile(loc f) {
 	content = eraseBlockComment(content); // get rid of comments
 	//println ("file after comments omitted: <content>");
 	content = eraseEmptyLines(content); // get rid of empty lines
+	content = eraseCurlyBraces(content);
 	//println ("file after empty lines omitted: <content>");
 	list[str] locf  = [s | s <- split(newLine, content), !(/^\s*$/ := s)];
 	return locf;

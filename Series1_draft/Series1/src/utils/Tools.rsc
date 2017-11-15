@@ -42,3 +42,9 @@ public str eraseEmptyLines(str content) {
     }
 }
 
+public str eraseCurlyBraces(str content) {
+	//println ("String: <s>");
+    return visit(content) {
+        case /^\{[{}]*/ => ""  
+    }
+}
