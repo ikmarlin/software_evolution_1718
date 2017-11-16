@@ -25,7 +25,7 @@ import metrics;
 /* java projects of interest */
 public loc smallsql = |project://smallsql0.21_src/|;
 public loc hsqldb   = |project://hsqldb-2.3.1/|;
-public loc junitLoc = |project://smallsql0.21_src/src/junit|;
+public loc junitLoc = |project://smallsql0.21_src/src/junit/|;
 
 /* create a model from eclipse project*/
 public M3 getModelForProject(loc projectLoc) =  createM3FromEclipseProject(projectLoc);
@@ -33,6 +33,7 @@ public M3 getModelForProject(loc projectLoc) =  createM3FromEclipseProject(proje
 /* models of interest */
 public M3 smallModel = getModelForProject(smallsql);
 public M3 hsModel    = getModelForProject(hsqldb);
+public M3 testModel  = getModelForProject(junitLoc);
 
 /* public maps to store intermediate or final output */
 public int volume					= 0;

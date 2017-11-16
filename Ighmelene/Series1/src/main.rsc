@@ -161,9 +161,9 @@ public int _getUnitCC(Declaration d)
 			case \foreach(_,_,_): cc += 1;
 			case \if(_,_): cc += 1;
 			case \if(_,_,_): cc += 1;
-    			case \infix(_,"&&",_): cc += 1;
-    			case \infix(_,"||",_): cc += 1;
-    			case \infix(_,"^",_): cc += 1;
+			case \infix(_,"&&",_): cc += 1;
+			case \infix(_,"||",_): cc += 1;
+			case \infix(_,"^",_): cc += 1;
 			case \while(_,_): cc += 1;
 		}
 		unitcc[key] = cc;

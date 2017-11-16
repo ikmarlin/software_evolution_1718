@@ -66,7 +66,7 @@ public int getCountLOCDuplication(M3 model) {
 
 public real getDuplicationRatio(M3 model) = toReal(getCountLOCDuplication(model))/toReal(size(extractAllLines(model)))*100;
 
-// sigScales = ["++", "+", "o", "-", "--"]; 
+/*  get sig-model rankining based on the duplicates ratio */
 public str getDuplicationRanking(real ratio) {
 	if(ratio >=0 && ratio <=3) return sigScales[0]; // ++
 	if(ratio >3 && ratio <=5)return sigScales[1]; // +

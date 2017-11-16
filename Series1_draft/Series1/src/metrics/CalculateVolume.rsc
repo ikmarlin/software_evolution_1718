@@ -19,19 +19,19 @@ import metrics::SigModelScale;
 import metrics::CalculateLOC;
 
 /* Based on java KLOC ranking for Volume of a project, get the sig scale string
-	
-		Rank (Java KLOC)
-		##############
-		 ++   0-66
-		##############
-		 +   66-246
-		##############
-		 o   246-665
-		##############
-		 - 	 655-1,310
-		##############
-		 --	 > 310
-		##############
+*	
+*		Rank (Java KLOC)
+*		##############
+*		 ++   0-66
+*		##############
+*		 +   66-246
+*		##############
+*		 o   246-665
+*		##############
+*		 - 	 655-1,310
+*		##############
+*		 --	 > 310
+*		##############
 */
 
 

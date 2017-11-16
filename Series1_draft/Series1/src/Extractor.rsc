@@ -43,11 +43,12 @@ public Declaration _getClassAst(loc f){
 	return asts[f];
 }
 
-/* get test methods */
-public list[loc] extractTestMethods(loc testloc) = extractMethods(testloc);
+/* get test & non-test methods */
+public list[loc] extractTestMethods(M3 model)   =
+ [m | m <-extractMethods(testModel)];
+public list[loc] extractNoTestMethods(M3 model) = 
+[m | m <-extractMethods(model), m notin extractMethods(testModel)];
 
-/* get non-test methods */
-public list[loc] extractNoTestMethods(M3 model) = [m | m <-extractMethods(model), m notin extractTestMethods(junitLoc)];
 
 /*TODO, not used, get files from a java project, excluding sub-folders and with specific extension */
 public list[loc] extractSpecificFiles(loc project, list[str] paths, str fileExt) =

@@ -20,15 +20,15 @@ import metrics::SigModelScale;
 import metrics::CalculateUnitSize;
 
 /* calculate the percentages of the complexity risks levels for units
-	CC 		Risk evaluation
-	#################################
-	1-10 	simple, without much risk
-	11-20 	more complex, moderate risk
-	21-50 	complex, high risk
-	 > 50  untestable, very high risk
-	 
-	 rascal>getComplexityRisksPercentages(smallModel);
-	 ComplexityRisksPercentages: <38.0934313500,15.6082523100,24.9845862000,21.3137301400>
+*	CC 		Risk evaluation
+*	#################################
+*	1-10 	simple, without much risk
+*	11-20 	more complex, moderate risk
+*	21-50 	complex, high risk
+*	 > 50  untestable, very high risk
+*	 
+*	 rascal>getComplexityRisksPercentages(smallModel);
+*	 ComplexityRisksPercentages: <38.0934313500,15.6082523100,24.9845862000,21.3137301400>
 */
 
 alias ComplexityRisksPercentages = tuple[real simple, real moderate, real high, real veryHigh];
