@@ -1,5 +1,11 @@
 module metrics::CalculateDuplication
-
+/**
+ *
+ * This module is
+ * 
+ * @author ighmelene.marlin, rasha.daoud
+ *
+ */
 import IO;
 import String;
 import List;
@@ -25,39 +31,35 @@ import metrics::SigModelScale;
 	o 		5-10%
 	- 		10-20%
 	-- 		20-100%
-	rascal>getCountLOCDuplication(smallModel);
-	int: 892
-	
-	rascal>getDuplicationRatio(smallModel);
-	real: 4.23049561300
-	
-	rascal>getDuplicationRanking(getDuplicationRatio(smallModel));
-	str: "+"
 */
 
-public int getCountLOCDuplication(loc project) {
+/* count the LOC in the java project, on files level, based on the 6-line block concept */
+public int getCountLOCDuplication(M3 model) {
 	blocksOf6Lines = [];
 	//println("<extractFiles(project)>");
-	for (l <- extractFiles(project)) {
-		list[str] content = getLOCFileNoCurlyBraces(l); // method LOC
-		//println("<content> <size(content)>");
-		if (size(content) >= 6){
-		// for methods of loc >=6 excluding comment blocks, empty lines and white-spaces, we store all possible blocks
+	for (l <- extractFiles(model)) {
+		list[str] content = getCountLOC(l); // count LOC per file
+		// ignore files that are shorter than 6 lines, exclusive comments, empty lines and curly-braces
+		if (size(content) >= 6){ // for foles of loc >=6 we store all possible blocks with file location and block index (start-line)
 			blocksOf6Lines += [[l1,l2,l3,l4,l5,l6] | [_*,l1,l2,l3,l4,l5,l6,_*] := zip(content, index(content), [l | i <- [0..size(content)]])];
 		}
 	}
+	
 	storage = ();
 	dups = [];
+	// scan list for possible duplicates
 	for (b <- blocksOf6Lines) {
 		// extract lines from block
 		content = [line | <line,i,l> <- b];
 		// check whether the sequencial lines of that block exists elsewhere, if yes register it as duplicate, otherwlse  add it
-		if (!(content in storage)) {
+		if (!(content in storage)) { // save it to storage with file location & block start-line index
 			storage[content] = b;
-		} else {
+		} else { //duplicate and not same block, store it
 			dups += {lineData | lineData <- b};
 		}
 	}
+	
+	//lines in dups are duplicated line, return size of list
 	return size(dups);
 }
 
@@ -67,8 +69,8 @@ public real getDuplicationRatio(M3 model) = toReal(getCountLOCDuplication(model)
 // sigScales = ["++", "+", "o", "-", "--"]; 
 public str getDuplicationRanking(real ratio) {
 	if(ratio >=0 && ratio <=3) return sigScales[0]; // ++
-	else if(ratio >3 && ratio <=5)return sigScales[1]; // +
-	else if(ratio >5 && ratio <=10) return sigScales[2]; // o
-	else if(ratio >10 && ratio <=20) return sigScales[3]; // -
-	else return sigScales[4]; // --
+	if(ratio >3 && ratio <=5)return sigScales[1]; // +
+	if(ratio >5 && ratio <=10) return sigScales[2]; // o
+	if(ratio >10 && ratio <=20) return sigScales[3]; // -
+	return sigScales[4]; // --
 }

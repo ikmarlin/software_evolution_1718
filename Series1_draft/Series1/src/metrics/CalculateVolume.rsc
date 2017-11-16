@@ -1,5 +1,11 @@
 module metrics::CalculateVolume
-
+/**
+ *
+ * This module is
+ * 
+ * @author ighmelene.marlin, rasha.daoud
+ *
+ */
 import IO;
 import String;
 import List;
@@ -27,37 +33,19 @@ import metrics::CalculateLOC;
 		 --	 > 310
 		##############
 */
-public str getVolumeRanking(int numLines) {
-	if(numLines <= 66000) return sigScales[0];
-	else if(numLines <= 246000) return sigScales[1];
-	else if(numLines <= 665000) return sigScales[2]; 
-	else if(numLines <= 1310000) return sigScales[3];
-	else return sigScales[4];
+
+
+/* calculate volume based on classes in java project - Halstead volume */
+public int getVolumeAllClasses(M3 model) = volume == 0? (0 | it + getCountLOC(c) | c <- extractClasses(model)):volume; //countLoc RD
+
+/* calculate volume based on files in java project */
+public int getVolumeAllFiles(M3 model)   = volume == 0? (0 | it + getCountLOC(f) | f <- extractFiles(model)):volume; //countLoc RD
+
+/* get sig ranking string based on volume */
+public str getVolumeRanking(int vol) {
+	if(vol <= 66000) return sigScales[0];
+	if(vol <= 246000) return sigScales[1];
+	if(vol <= 665000) return sigScales[2]; 
+	if(vol <= 1310000) return sigScales[3];
+	return sigScales[4];
 }
-
-
-/* calculate volume/classes - Halstead volume*/
-public int getVolumeAllClasses(M3 model) {
-	list[loc] cls = extractClasses(model);
-	return toInt(sum(mapper(cls, countLOCFile)));
-}
-
-/* calculate volume/files */
-public int getVolumeAllFiles(loc project, list[str] paths, str fileExt) {
-	list[loc] files = extractFiles(project, paths, fileExt);
-	return toInt(sum(mapper(files, countLOCFile)));
-}
-
-/*
-	rascal>getVolumeAllClasses(smallModel);
-	int: 23673
-	
-	rascal>getVolumeAllFiles(smallsql, ["junit"], "java");
-	int: 24048
-	
-	rascal>getVolumeRanking(getVolumeAllClasses(smallModel));
-	str: "++"
-
-	rascal>getVolumeRanking(getVolumeAllClasses(hsModel));
-	str: "+"
-*/

@@ -1,5 +1,11 @@
 module utils::Tools
-
+/**
+ *
+ * This module is
+ * 
+ * @author ighmelene.marlin, rasha.daoud
+ *
+ */
 import IO;
 import String;
 
@@ -45,6 +51,6 @@ public str eraseEmptyLines(str content) {
 public str eraseCurlyBraces(str content) {
 	//println ("String: <s>");
     return visit(content) {
-        case /^\{[{}]*/ => ""  
+        case /[\{\}]/ => " "
     }
 }

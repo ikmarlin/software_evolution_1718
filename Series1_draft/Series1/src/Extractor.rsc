@@ -1,5 +1,11 @@
 module Extractor
-
+/**
+ *
+ * This module is
+ * 
+ * @author ighmelene.marlin, rasha.daoud
+ *
+ */
 import IO;
 import String;
 import List;
@@ -16,48 +22,34 @@ import metrics::CalculateLOC;
 
 
 /* get files from a java project */
-public list[loc] extractSpecificFiles(loc project, list[str] paths, str fileExt) =
-	[f | path <- paths, /file(f) <- crawl(project), f.extension == fileExt && f.path != path];
-// rascal>extractFiles(smallsql, ["junit"], "java");
+public list[loc] extractFiles(M3 model) = toList(files(model));
+public int lengthExtractedFiles(loc project) = size([f | /file(f) <- crawl(project)]); //all lines included
 
-/* count number of java classes in the model (project) 
-TODO we need to exclude the junit folder */
+
+/* count number of java classes in the model (project) */
 public list[loc] extractClasses(M3 model) = toList(classes(model));
 public int countClasses(M3 model) = size(toList(classes(model)));
 
-public list[loc] extractMethods(M3 model) {
-	list[str] bodyTexts = [];
-	methodslocs = methods(model);
-	for (l <- methodslocs) {
-		//println("<l>");
-		statementsInMethod(l);
+/* count number of units in the model (project) */
+public list[loc] extractMethods(M3 model) = toList(methods(model));
+public int countMethods(M3 model) = size(toList(methods(model)));
+
+
+/* get asts of a class */	
+public Declaration _getClassAst(loc f){
+	if(f notin asts){
+		asts[f] = createAstFromFile(f, true);
 	}
-	return toList(methodslocs);
-}
-	
-/*
-extractFiles(smallsql, ["junit", "tool"], "java");
-extractFiles(smallsql, ["junit"], "java");
-
-*/
-
-
-public void statementsInMethod(loc location) {
-    ast = createAstFromFile(location, true, javaVersion="1.8");
-	visit(ast){ 
-    case \if(icond,ithen,ielse): {
-        println(" if-then-else statement with condition <icond> found\n"); } 
-    case \if(icond,ithen): {
-        println(" if-then statement with condition <icond> found\n"); } 
-    case \while(icond): {
-    	println(" while statement with condition <icond> found\n"); } 
-    case \for(_): {
-    	println(" for statement found\n"); } 
-	};
+	return asts[f];
 }
 
-public list[loc] extractFiles(loc project) =
-	[f | /file(f) <- crawl(project)];
-	
-public int lengthExtractFiles(loc project) =
-	size([f | /file(f) <- crawl(project)]);
+/* get test methods */
+public list[loc] extractTestMethods(loc testloc) = extractMethods(testloc);
+
+/* get non-test methods */
+public list[loc] extractNoTestMethods(M3 model) = [m | m <-extractMethods(model), m notin extractTestMethods(junitLoc)];
+
+/*TODO, not used, get files from a java project, excluding sub-folders and with specific extension */
+public list[loc] extractSpecificFiles(loc project, list[str] paths, str fileExt) =
+	[f | path <- paths, /file(f) <- crawl(project), f.extension == fileExt && f.path != path];
+// rascal>extractFiles(smallsql, ["junit"], "java");

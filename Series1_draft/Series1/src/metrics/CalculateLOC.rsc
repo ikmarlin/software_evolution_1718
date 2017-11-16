@@ -1,5 +1,11 @@
 module metrics::CalculateLOC
-
+/**
+ *
+ * This module is
+ * 
+ * @author ighmelene.marlin, rasha.daoud
+ *
+ */
 import IO;
 import String;
 import List;
@@ -9,12 +15,68 @@ import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import lang::java::\syntax::Java15;
+
+import Main;
 import Extractor;
 import utils::Tools;
 
+
+/* get item LOC, that can be file, class, unit .. */
+public int getCountLOC(loc f){
+	if(!exists(f)) return 0;
+	if(f notin unitsize){
+		m			= _getUnitM3(f);
+		content		= size(_getFileLOContentAsArray(f));
+		comments	= _getFileLOComments(m);
+		iprintln("<comments>");
+		unitsize[f] = content-comments;
+		println("<comments>");
+	}
+	return unitsize[f];
+}
+
+/* get count lines of comments in model */
+public int _getFileLOComments(M3 m){
+	allLines		= [<t.begin,t.end> | /<loc _, loc t> := m, t.begin?];
+	allComments	    = [<c.begin,c.end> | /<loc _, loc c> := m.documentation, c.begin?];
+	onlyComments	= [<bl,el> | <<bl,_>,<el,_>> <- allComments] - [<bl,el> | <<bl,_>,<el,_>> <- allLines-allComments];
+	linesComms 	    = [l | l <- [*[bl..el+1] | <bl,el> <- onlyComments]];
+	//println("<size(linesComms)>");
+	return size(linesComms);
+}
+
+/* get file lines that aren't blank */
+private str _getFileLOContentAsString(loc f){
+	if(f notin filestr){
+		ls = _getFileLOContentAsArray(f);
+		filestr[f] = intercalate("\n",ls);
+	}
+	return filestr[f];
+}
+
+
+private M3 _getUnitM3(loc f){
+	if(f notin m3s){
+		s = _getFileLOContentAsString(f);
+		m = createM3FromString(f,s);
+		m3s[f] = m;
+	}
+	return m3s[f];
+}
+
+
+/* get list o LOC that are't blank */
+private list[str] _getFileLOContentAsArray(loc f){
+	if(f notin filearr){
+		filearr[f] = [l | l <- readFileLines(f), ! /^\s*$/ := l]; //Lines that aren't blank
+	}
+	return filearr[f];
+}
+
+
 /* LOC count per file */
-public int countLOCFile(loc f) = size(getLOCFile(f));
-public list[str] getLOCFile(loc f) {
+public int countLOC(loc f) = size(getLOC(f));
+public list[str] getLOC(loc f) {
 	str content = eraseOneLineComment(readFile(f)); // get rid of comments
 	content = eraseBlockComment(content); // get rid of comments
 	//println ("file after comments omitted: <content>");
@@ -25,8 +87,8 @@ public list[str] getLOCFile(loc f) {
 }
 
 /* LOC count per file without curly braces */
-public int countLOCFileNoCurlyBraces(loc f) = size(getLOCFileNoCurlyBraces(f));
-public list[str] getLOCFileNoCurlyBraces(loc f) {
+public int countLOCNoCurlyBraces(loc f) = size(getLOCNoCurlyBraces(f));
+public list[str] getLOCNoCurlyBraces(loc f) {
 	str content = eraseOneLineComment(readFile(f)); // get rid of comments
 	content = eraseBlockComment(content); // get rid of comments
 	//println ("file after comments omitted: <content>");
@@ -38,8 +100,4 @@ public list[str] getLOCFileNoCurlyBraces(loc f) {
 	return locf;
 }
 
-/* LOC count per unit (method) */
-public int countLOCUnit(loc f) = size(getLOCUnit(f));
-public list[int] getLOCUnit(M3 model) = mapper(methods(Model), getLOCFile);
-
-public list[str] extractAllLines(M3 model) = [trim(l) | m <- extractMethods(model), l <-  getLOCFile(m)];
+public list[str] extractAllLines(M3 model) = [trim(l) | m <- extractMethods(model), l <-  getCountLOC(m)];
