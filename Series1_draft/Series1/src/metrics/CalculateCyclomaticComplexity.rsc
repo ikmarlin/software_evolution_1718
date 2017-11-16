@@ -72,9 +72,9 @@ public str getCyclomaticComplexityRanking(M3 model){
 	ccs 	= getCyclomaticComplexity(model);
 	
 	for(f <- extractMethods(model)){
-		if(f in unitsize) 	println("size: <unitsize[f]>");
+		/*if(f in unitsize) 	println("size: <unitsize[f]>");
 		if(f in unitcc)		println("cc:   <unitcc[f]>");
-		println("\n");
+		println("\n");*/
 		if(ccs[f] <= 20) s += getCountLOC(f);// _getUnitSize
 		else if(ccs[f] <= 50) c += getCountLOC(f);// _getUnitSize
 		else u += getCountLOC(f); // _getUnitSize

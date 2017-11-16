@@ -25,6 +25,7 @@ import metrics::CalculateVolume;
 import metrics::CalculateUnitSize;
 import metrics::CalculateUnitTesting;
 import metrics::CalculateDuplication;
+import metrics::CalculateUnitComplexity;
 import metrics::CalculateCyclomaticComplexity;
 
 /* java projects of interest */
