@@ -38,7 +38,7 @@ public int getCountLOCDuplication(M3 model) {
 	blocksOf6Lines = [];
 	//println("<extractFiles(project)>");
 	for (l <- extractFiles(model)) {
-		list[str] content = getCountLOC(l); // count LOC per file
+		list[str] content = getLOCNoCurlyBraces(l); // get LOC per file
 		// ignore files that are shorter than 6 lines, exclusive comments, empty lines and curly-braces
 		if (size(content) >= 6){ // for foles of loc >=6 we store all possible blocks with file location and block index (start-line)
 			blocksOf6Lines += [[l1,l2,l3,l4,l5,l6] | [_*,l1,l2,l3,l4,l5,l6,_*] := zip(content, index(content), [l | i <- [0..size(content)]])];

@@ -6,14 +6,17 @@ module metrics::CalculateCyclomaticComplexity
  * @author ighmelene.marlin, rasha.daoud
  *
  */
+import util::Math;
 import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import lang::java::jdt::m3::AST;
 import lang::java::\syntax::Java15;
 import Extractor;
+import Main;
 import metrics::SigModelScale;
 import metrics::CalculateLOC;
+import metrics::CalculateVolume;
 
 /* get count of different statement types for cyclomatic-complexity calculation */
 public int _getUnitCC(Declaration d){
@@ -60,7 +63,7 @@ public map[loc,int] getCyclomaticComplexity(M3 model){
 
 /* get unit-cyclomatic-complexity ranking following Sig-Model */
 public str getCyclomaticComplexityRanking(M3 model){
-	real v	= toReal(getVolume(model));
+	real v	= toReal(getVolumeAllFiles(model));
 	s		= 0;
 	c		= 0;
 	u		= 0;
@@ -69,7 +72,7 @@ public str getCyclomaticComplexityRanking(M3 model){
 	for(f <- extractMethods(model)){
 		if(f in unitsize) 	println("size: <unitsize[f]>");
 		if(f in unitcc)		println("cc:   <unitcc[f]>");
-		println("");
+		//println("\n");
 		if(ccs[f] <= 20) s += getCountLOC(f);// _getUnitSize
 		else if(ccs[f] <= 50) c += getCountLOC(f);// _getUnitSize
 		else u += getCountLOC(f); // _getUnitSize
@@ -77,9 +80,12 @@ public str getCyclomaticComplexityRanking(M3 model){
 	ps = 100 * (s/v);
 	pc = 100 * (c/v);
 	pu = 100 * (u/v);
-	println("Volume: <getVolumeAllFiles(model)>"); //TODO - or getVolumeAllClasses?
-	println("Moderate:  <s> --\> <ps>%");
-	println("High:      <c> --\> <pc>%");
+	println("Unit-cyclomatic-complexity.....");
+	//println("Volume: <getVolumeAllFiles(model)>"); //TODO - or getVolumeAllClasses?
+	println("***Risk percentages:");
+	println("--------------------");
+	print("Moderate:  <s> --\> <ps>%\t");
+	print("High:      <c> --\> <pc>%\t");
 	println("Very high: <u> --\> <pu>%");
 	if(ps <= 25 && pc == 0 && pu == 0) return sigScales[0];
 	if(ps <= 30 && pc <= 5 && pu == 0) return sigScales[1];

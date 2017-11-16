@@ -27,6 +27,7 @@ public map[loc,int] getUnitsSize(M3 model){
 	return unitsSize;
 }
 
+
 //TODO we might not need this!
 public real averageUnitsSize(M3 model) {
 	map[loc,int] unitsSize = getUnitsSize(model);

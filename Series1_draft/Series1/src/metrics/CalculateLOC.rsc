@@ -100,4 +100,4 @@ public list[str] getLOCNoCurlyBraces(loc f) {
 	return locf;
 }
 
-public list[str] extractAllLines(M3 model) = [trim(l) | m <- extractMethods(model), l <-  getCountLOC(m)];
+public list[str] extractAllLines(M3 model) = [trim(l) | m <- extractMethods(model), l <-  getLOCNoCurlyBraces(m)];
