@@ -6,14 +6,16 @@ module metrics::CalculateCyclomaticComplexity
  * @author ighmelene.marlin, rasha.daoud
  *
  */
+import IO;
 import util::Math;
 import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import lang::java::jdt::m3::AST;
 import lang::java::\syntax::Java15;
-import Extractor;
+
 import Main;
+import Extractor;
 import metrics::SigModelScale;
 import metrics::CalculateLOC;
 import metrics::CalculateVolume;
@@ -72,7 +74,7 @@ public str getCyclomaticComplexityRanking(M3 model){
 	for(f <- extractMethods(model)){
 		if(f in unitsize) 	println("size: <unitsize[f]>");
 		if(f in unitcc)		println("cc:   <unitcc[f]>");
-		//println("\n");
+		println("\n");
 		if(ccs[f] <= 20) s += getCountLOC(f);// _getUnitSize
 		else if(ccs[f] <= 50) c += getCountLOC(f);// _getUnitSize
 		else u += getCountLOC(f); // _getUnitSize

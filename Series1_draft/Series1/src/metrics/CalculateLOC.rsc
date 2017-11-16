@@ -28,9 +28,9 @@ public int getCountLOC(loc f){
 		m			= _getUnitM3(f);
 		content		= size(_getFileLOContentAsArray(f));
 		comments	= _getFileLOComments(m);
-		iprintln("<comments>");
+		//iprintln("<comments>");
 		unitsize[f] = content-comments;
-		println("<comments>");
+		//println("<comments>");
 	}
 	return unitsize[f];
 }
