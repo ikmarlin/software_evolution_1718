@@ -56,25 +56,26 @@ void main(){
 	str dupsScale = getDuplicationRanking(dupsRatio);
 	println("***Code duplication = <dupsRatio>% : <dupsScale>");
 	
+	volume = getVolumeAllFiles(smallModel);
+	str volScale = getVolumeRanking(vol);
+	println("***Code volume = <volume> LOC : <volScale>");
+	
 	str ccScale = getCyclomaticComplexityRanking(smallModel);
 	println("***Unit-cc-ranking = <ccScale>");
 	
-	// is it needed?
+	
+	//unitsize = getUnitsSize(model);
+	// is it needed? if not, then we add the line above to make sure the map is filled out
 	ComplexityRisksPercentages tup = getComplexityRisksPercentages(smallModel);
 	usScale = getUnitComplexityRanking(tup);
 	println ("***Complexity % based on unit-size = <tup>, <usScale>");
-	
-	
-	int vol = getVolumeAllFiles(smallModel);
-	str volScale = getVolumeRanking(vol);
-	println("***Code volume = <vol> LOC : <volScale>");
 	
 	
 	real coverage = getUnitTestCoverage(smallModel, |java+class:///smallsql/junit/BasicTestCase|);
 	str utscale = getUnitTestCoverageRanking(coverage);
 	println("***Unit-test-coverage = <coverage>% : <utscale>");
 	
-	println("########################");
+	println("###########Maintainability aspects#############");
 	changeability(ccScale, dupsScale);
 	testability(ccScale, utscale);
 	analysability(volScale, dupsScale, utscale, usScale);

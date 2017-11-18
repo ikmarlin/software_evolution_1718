@@ -35,10 +35,9 @@ alias ComplexityRisksPercentages = tuple[real simple, real moderate, real high, 
 
 public ComplexityRisksPercentages getComplexityRisksPercentages(M3 model) {
 // we need to categorize unit-size values between 4 different categories according to the definition of Cyclomatic complexity */
+	unitsize = getUnitsSize(model); // fill out unitsize global map[int,loc]
 	
-	//map[loc,int] unitsSize = getUnitsSize(model); // it is already filled out in unitsSize
-	
-	list[int] unitsSizeList = [unitsSize[l] | l <- unitsSize];
+	list[int] unitsSizeList = [unitsize[l] | l <- unitsize];
 	int simple = sum([unitSize | unitSize <- unitsSizeList, unitSize <= 10]);
 	int moderate = sum([unitSize | unitSize <- unitsSizeList, unitSize > 10 && unitSize <= 20]);
 	int high = sum([unitSize | unitSize <- unitsSizeList, unitSize > 20 && unitSize <= 50]);

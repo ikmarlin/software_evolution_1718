@@ -9,12 +9,9 @@ class Column implements Cloneable{
     private String name;
     	private boolean identity;   
     private boolean caseSensitive;   /*dff*/  /*ddd*/
-    private boolean nullable = true;		//
-      private int scale;  /*dff*/     	
-    private int precision;			
-    private int dataType; 	
+    private boolean nullable = true;
+      private int scale; 
+    private int precision;
+    private int dataType;
     private Identity counter; // counter for identity values
-    /*dd
-     * sd
-     */
 }

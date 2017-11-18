@@ -32,14 +32,19 @@ import metrics::CalculateLOC;
 *		##############
 *		 --	 > 310
 *		##############
+*
+*	getVolumeAllFiles(smallModel);
+*	int: 24048
+*	getVolumeAllClasses(smallModel);
+*	int: 23673
 */
 
 
 /* calculate volume based on classes in java project - Halstead volume */
-public int getVolumeAllClasses(M3 model) = volume == 0? (0 | it + countLOC(c) | c <- extractClasses(model)):volume; //RD method
+public int getVolumeAllClasses(M3 model) = (0 | it + countLOC(c) | c <- extractClasses(model)); //RD method
 
 /* calculate volume based on files in java project */
-public int getVolumeAllFiles(M3 model)   = volume == 0? (0 | it + countLOC(f) | f <- extractFiles(model)):volume; // RD method
+public int getVolumeAllFiles(M3 model)   = (0 | it + countLOC(f) | f <- extractFiles(model)); // RD method
 
 /* get sig ranking string based on volume */
 public str getVolumeRanking(int vol) {

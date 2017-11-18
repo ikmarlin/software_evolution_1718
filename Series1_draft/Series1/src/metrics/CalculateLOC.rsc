@@ -21,7 +21,7 @@ import Extractor;
 import utils::Tools;
 
 
-/* LOC count per file */
+/* get LOC count per item, item can be file, class, unit */
 public int countLOC(loc f) = size(getLOC(f));
 public list[str] getLOC(loc f) {
 	str content = eraseOneLineComment(readFile(f)); // get rid of comments
@@ -33,7 +33,7 @@ public list[str] getLOC(loc f) {
 	return locf;
 }
 
-/* LOC count per file without curly braces */
+/* get LOC count per item without curly braces */
 public int countLOCNoCurlyBraces(loc f) = size(getLOCNoCurlyBraces(f));
 public list[str] getLOCNoCurlyBraces(loc f) {
 	str content = eraseOneLineComment(readFile(f)); // get rid of comments

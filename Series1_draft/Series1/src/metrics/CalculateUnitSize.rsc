@@ -14,23 +14,22 @@ import util::FileSystem;
 import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::\syntax::Java15;
+import Main;
 import metrics::CalculateLOC;
 
 
 /* get unit-loc & unit size (method size), by counting LOC in each unit, excluding comments & empty lines */
 public map[loc,int] getUnitsSize(M3 model){
-	map [loc,int] unitsSize = ();
 	for(<_,f> <- declaredMethods(model)){
-	//println("<f>");
-		if(exists(f)) unitsSize[f] = countLOC(f); // RD method
+		if(exists(f)) unitsize[f] = countLOC(f); // RD method
 	}
-	return unitsSize;
+	//println("<unitsize>");
+	return unitsize;
 }
 
 
 //TODO we might not need this!
 public real averageUnitsSize(M3 model) {
-	map[loc,int] unitsSize = getUnitsSize(model);
 	int l = 0;
 	int sm = 0;
 	for (<_,f> <- declaredMethods(model)) {
