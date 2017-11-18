@@ -52,13 +52,14 @@ void main(){
  	int time = realTime();
 	println("***Start of demo .. analyzing code for project smallsql...");
 	
-	real dupsRatio = getDuplicationRatio(smallModel);
-	str dupsScale = getDuplicationRanking(dupsRatio);
-	println("***Code duplication = <dupsRatio>% : <dupsScale>");
-	
 	volume = getVolumeAllFiles(smallModel);
 	str volScale = getVolumeRanking(vol);
 	println("***Code volume = <volume> LOC : <volScale>");
+	
+	real dupsRatio = getDuplicationRatio(smallModel);
+	str dupsScale = getDuplicationRanking(dupsRatio);
+	println("***Code duplication = <dupsRatio>% : <dupsScale>");
+
 	
 	str ccScale = getCyclomaticComplexityRanking(smallModel);
 	println("***Unit-cc-ranking = <ccScale>");

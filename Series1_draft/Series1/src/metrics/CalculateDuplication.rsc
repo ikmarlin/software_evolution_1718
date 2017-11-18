@@ -18,6 +18,7 @@ import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import lang::java::\syntax::Java15;
+import Main;
 import Extractor;
 import utils::Tools;
 import metrics::CalculateLOC;
@@ -53,21 +54,30 @@ public int getCountLOCDuplication(M3 model) {
 		// extract lines from block
 		content = [line | <line,i,l> <- b];
 		// check whether the sequencial lines of that block exists elsewhere, if yes register it as duplicate, otherwlse  add it
-		if (!(content in storage)) { // save it to storage with file location & block start-line index
+		if (content notin storage) { // save it to storage with file location & block start-line index
 			storage[content] = b;
 		} else { //duplicate and not same block, store it
-			dups +=  {lineData | lineData <- content};
+			dups +=  {lineData | lineData <- b};
+			if(storage[content] notin dups) 
+				dups +=  {lineData | lineData <- storage[content]};
 			//println("content: <content>");
 		}
 	}
 	
 	//lines in dups are duplicated line, return size of list
-	//println("dups: <dups>");
+	println("dups: <dups>");
 	return size(dups);
 }
 
 
-public real getDuplicationRatio(M3 model) = toReal(getCountLOCDuplication(model))/toReal(size(extractAllLines(model)))*100;
+public real getDuplicationRatio(M3 model) {
+	if(volume!=0) {
+	 	return toReal(getCountLOCDuplication(model))/toReal(volume)*100;
+	 } else {
+		println("calculate volume first");
+		return 0.;
+	}
+}
 
 /*  get sig-model rankining based on the duplicates ratio */
 public str getDuplicationRanking(real ratio) {

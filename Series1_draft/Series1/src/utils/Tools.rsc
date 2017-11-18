@@ -44,7 +44,7 @@ public str eraseBlockComment(str content) {
 public str eraseEmptyLines(str content) {
 	//println ("String: <s>");
     return visit(content) {
-        case /^\n[\n\t ]*\n/ => "\n"  
+        case /^[ \t]*\r?\n/ => "\n"
     }
 }
 
@@ -52,5 +52,6 @@ public str eraseCurlyBraces(str content) {
 	//println ("String: <s>");
     return visit(content) {
         case /[\{\}]/ => " "
+        //case "^\\s+" => ""
     }
 }

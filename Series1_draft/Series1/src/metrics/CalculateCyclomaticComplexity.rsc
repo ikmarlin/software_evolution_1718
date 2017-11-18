@@ -65,7 +65,7 @@ public map[loc,int] getCyclomaticComplexity(M3 model){
 
 /* get unit-cyclomatic-complexity ranking following Sig-Model */
 public str getCyclomaticComplexityRanking(M3 model){
-	real v	= toReal(getVolumeAllFiles(model));
+	real v	= toReal(volume); // getVolumeAllFiles(model) we calculate it in main before calling this method
 	s		= 0;
 	c		= 0;
 	u		= 0;
@@ -83,7 +83,7 @@ public str getCyclomaticComplexityRanking(M3 model){
 	pc = 100 * (c/v);
 	pu = 100 * (u/v);
 	println("Unit-cyclomatic-complexity.....");
-	//println("Volume: <getVolumeAllFiles(model)>"); // or getVolumeAllClasses?
+	//println("Volume: <volume>");
 	println("***Risk percentages:");
 	println("--------------------");
 	print("Moderate:  <s> --\> <ps>%\t");
