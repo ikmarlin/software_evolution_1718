@@ -36,17 +36,18 @@ import metrics::SigModelScale;
 /* count the LOC in the java project, on files level, based on the 6-line block concept */
 public int getCountLOCDuplication(M3 model) {
 	blocksOf6Lines = [];
-	//println("<extractFiles(project)>");
+	//println("<size(extractFiles(model))>");
 	for (l <- extractFiles(model)) {
-		list[str] content = getLOCNoCurlyBraces(l); // get LOC per file
-		// ignore files that are shorter than 6 lines, exclusive comments, empty lines and curly-braces
+		list[str] content = [trim(s) | s <- (getLOCNoCurlyBraces(l))]; // get LOC per file
+		// ignore files that are shorter than 6 lines, exclusive comments, empty lines, leading spaces, and curly-braces
 		if (size(content) >= 6){ // for foles of loc >=6 we store all possible blocks with file location and block index (start-line)
 			blocksOf6Lines += [[l1,l2,l3,l4,l5,l6] | [_*,l1,l2,l3,l4,l5,l6,_*] := zip(content, index(content), [l | i <- [0..size(content)]])];
+			//println("blocks: <blocksOf6Lines>");
 		}
 	}
 	
 	storage = ();
-	dups = [];
+	dups = {};
 	// scan list for possible duplicates
 	for (b <- blocksOf6Lines) {
 		// extract lines from block
@@ -55,11 +56,13 @@ public int getCountLOCDuplication(M3 model) {
 		if (!(content in storage)) { // save it to storage with file location & block start-line index
 			storage[content] = b;
 		} else { //duplicate and not same block, store it
-			dups += {lineData | lineData <- b};
+			dups +=  {lineData | lineData <- content};
+			//println("content: <content>");
 		}
 	}
 	
 	//lines in dups are duplicated line, return size of list
+	//println("dups: <dups>");
 	return size(dups);
 }
 
