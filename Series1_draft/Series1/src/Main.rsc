@@ -53,7 +53,7 @@ void main(){
 	println("***Start of demo .. analyzing code for project smallsql...");
 	
 	volume = getVolumeAllFiles(smallModel);
-	str volScale = getVolumeRanking(vol);
+	str volScale = getVolumeRanking(volume);
 	println("***Code volume = <volume> LOC : <volScale>");
 	
 	real dupsRatio = getDuplicationRatio(smallModel);
