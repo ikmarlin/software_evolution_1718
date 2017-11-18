@@ -87,19 +87,29 @@ public str getUnitTestCoverageRanking(real ratio) {
 
 public int getCountAssertionStatements(M3 model, loc extendedTestClass) {
     int total = 0;
-    list[loc] ms = extractTestsMethods(model, extendedTestClass);
-    for (m <- ms){
-	    int counter = 0;
-   		a 	= createAstFromFile(m, true);
-	    if ((\constructor(_,_,_,Statement impl) := a) || (method(_,_,_,_,Statement impl) := a)) {  
-	        visit (impl){
-	            case \assert(Expression expression): counter += 1;
-	            case \assert(Expression expression, Expression message): counter += 1;
-	            case \methodCall(bool isSuper, /assert/, list[Expression] arguments): counter += 1;
-	            case \methodCall(bool isSuper, Expression receiver, /assert/, list[Expression] arguments):counter += 1;
-			 }
-	    }
+    list[loc] junitClasses = 
+		[from | <from,to> <- model.extends, to == extendedTestClass];   
+   
+    for(c <- junitClasses){
+    	counter 	= 0;
+		a 	= _getClassAst(c);
+		for(f <- [d | /Declaration d := a, isMethod(d.decl)]){
+			visit(f){
+				case \method(_,_,_,_,Statement impl): {
+					visit (impl){
+			         	case \assertTrue(_): counter += 1;
+			         	case \assertFalse(_): counter += 1;
+			         	case \assertEquals(_ _): counter += 1;
+			            case \assert(_): counter += 1;
+			            case \assert(Expression expression, Expression message): counter += 1;
+			            case \methodCall(bool isSuper, /assert/, list[Expression] arguments): counter += 1;
+			            case \methodCall(bool isSuper, Expression receiver, /assert/, list[Expression] arguments):counter += 1;
+			 		}
+				};
+			}
+		}
 		total += counter;
     }
     return total;
 }
+
