@@ -96,7 +96,7 @@ public int getCountAssertionStatements(M3 model, loc extendedTestClass) {
 	            case \assert(Expression expression): counter += 1;
 	            case \assert(Expression expression, Expression message): counter += 1;
 	            case \methodCall(bool isSuper, /assert/, list[Expression] arguments): counter += 1;
-	            case \methodCall(bool isSuper, Expression receiver, /assert/, list[Expression] arguments): counter += 1;
+	            case \methodCall(bool isSuper, Expression receiver, /assert/, list[Expression] arguments):counter += 1;
 			 }
 	    }
 		total += counter;

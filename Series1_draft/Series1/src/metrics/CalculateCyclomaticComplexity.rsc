@@ -75,15 +75,15 @@ public str getCyclomaticComplexityRanking(M3 model){
 		/*if(f in unitsize) 	println("size: <unitsize[f]>");
 		if(f in unitcc)		println("cc:   <unitcc[f]>");
 		println("\n");*/
-		if(ccs[f] <= 20) s += getCountLOC(f);// _getUnitSize
-		else if(ccs[f] <= 50) c += getCountLOC(f);// _getUnitSize
-		else u += getCountLOC(f); // _getUnitSize
+		if(ccs[f] <= 20) s += countLOC(f);// RD _getUnitSize
+		else if(ccs[f] <= 50) c += countLOC(f);// RD _getUnitSize
+		else u += countLOC(f); // RD _getUnitSize
 	}
 	ps = 100 * (s/v);
 	pc = 100 * (c/v);
 	pu = 100 * (u/v);
 	println("Unit-cyclomatic-complexity.....");
-	//println("Volume: <getVolumeAllFiles(model)>"); //TODO - or getVolumeAllClasses?
+	//println("Volume: <getVolumeAllFiles(model)>"); // or getVolumeAllClasses?
 	println("***Risk percentages:");
 	println("--------------------");
 	print("Moderate:  <s> --\> <ps>%\t");

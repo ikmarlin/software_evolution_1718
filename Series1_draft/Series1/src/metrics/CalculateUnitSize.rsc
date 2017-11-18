@@ -22,7 +22,7 @@ public map[loc,int] getUnitsSize(M3 model){
 	map [loc,int] unitsSize = ();
 	for(<_,f> <- declaredMethods(model)){
 	//println("<f>");
-		if(exists(f)) unitsSize[f] = getCountLOC(f); // _getUnitSize, global name to be used for classes, files 
+		if(exists(f)) unitsSize[f] = countLOC(f); // RD method
 	}
 	return unitsSize;
 }

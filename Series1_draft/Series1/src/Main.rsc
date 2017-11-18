@@ -37,7 +37,7 @@ public M3 getModelForProject(loc projectLoc) =  createM3FromEclipseProject(proje
 
 /* models of interest */
 public M3 smallModel = getModelForProject(smallsql);
-public M3 hsModel    = getModelForProject(hsqldb);
+//public M3 hsModel    = getModelForProject(hsqldb);
 
 /* public maps to store intermediate or final output */
 public int volume					= 0;

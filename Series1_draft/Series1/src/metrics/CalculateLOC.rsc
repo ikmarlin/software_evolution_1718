@@ -21,14 +21,42 @@ import Extractor;
 import utils::Tools;
 
 
-/* get item LOC, that can be file, class, unit .. */
+/* LOC count per file */
+public int countLOC(loc f) = size(getLOC(f));
+public list[str] getLOC(loc f) {
+	str content = eraseOneLineComment(readFile(f)); // get rid of comments
+	content = eraseBlockComment(content); // get rid of comments
+	//println ("file after comments omitted: <content>");
+	content = eraseEmptyLines(content); // get rid of empty lines
+	//println ("file after empty lines omitted: <content>");
+	list[str] locf  = [s | s <- split(newLine, content), !(/^\s*$/ := s)];
+	return locf;
+}
+
+/* LOC count per file without curly braces */
+public int countLOCNoCurlyBraces(loc f) = size(getLOCNoCurlyBraces(f));
+public list[str] getLOCNoCurlyBraces(loc f) {
+	str content = eraseOneLineComment(readFile(f)); // get rid of comments
+	content = eraseBlockComment(content); // get rid of comments
+	//println ("file after comments omitted: <content>");
+	content = eraseEmptyLines(content); // get rid of empty lines
+	//println ("file after empty lines omitted: <content>");
+	content = eraseCurlyBraces(content); // get rid of curly braces
+	//println ("file after {} omitted: <content>");
+	list[str] locf  = [s | s <- split(newLine, content), !(/^\s*$/ := s)];
+	return locf;
+}
+
+public list[str] extractAllLines(M3 model) = [trim(l) | m <- extractMethods(model), l <-  getLOCNoCurlyBraces(m)];
+
+
+/* Ighmelene - get item LOC, that can be file, class, unit .. */
 public int getCountLOC(loc f){
 	if(!exists(f)) return 0;
 	if(f notin unitsize){
 		m			= _getUnitM3(f);
 		content		= size(_getFileLOContentAsArray(f));
 		comments	= _getFileLOComments(m);
-		//iprintln("<comments>");
 		unitsize[f] = content-comments;
 		//println("<comments>");
 	}
@@ -72,32 +100,3 @@ private list[str] _getFileLOContentAsArray(loc f){
 	}
 	return filearr[f];
 }
-
-
-/* LOC count per file */
-public int countLOC(loc f) = size(getLOC(f));
-public list[str] getLOC(loc f) {
-	str content = eraseOneLineComment(readFile(f)); // get rid of comments
-	content = eraseBlockComment(content); // get rid of comments
-	//println ("file after comments omitted: <content>");
-	content = eraseEmptyLines(content); // get rid of empty lines
-	//println ("file after empty lines omitted: <content>");
-	list[str] locf  = [s | s <- split(newLine, content), !(/^\s*$/ := s)];
-	return locf;
-}
-
-/* LOC count per file without curly braces */
-public int countLOCNoCurlyBraces(loc f) = size(getLOCNoCurlyBraces(f));
-public list[str] getLOCNoCurlyBraces(loc f) {
-	str content = eraseOneLineComment(readFile(f)); // get rid of comments
-	content = eraseBlockComment(content); // get rid of comments
-	//println ("file after comments omitted: <content>");
-	content = eraseEmptyLines(content); // get rid of empty lines
-	//println ("file after empty lines omitted: <content>");
-	content = eraseCurlyBraces(content); // get rid of curly braces
-	//println ("file after {} omitted: <content>");
-	list[str] locf  = [s | s <- split(newLine, content), !(/^\s*$/ := s)];
-	return locf;
-}
-
-public list[str] extractAllLines(M3 model) = [trim(l) | m <- extractMethods(model), l <-  getLOCNoCurlyBraces(m)];
