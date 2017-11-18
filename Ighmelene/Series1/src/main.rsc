@@ -1,26 +1,16 @@
 module main
 
 import IO;
-import List;
-import lang::java::m3::Core;
-import lang::java::jdt::m3::Core;
-import lang::java::m3::AST;
-import lang::java::jdt::m3::AST;
 import Map;
-import util::Math;
 import Set;
-import Relation;
-import analysis::graphs::Graph;
+import List;
+import String;
+import util::Math;
+import lang::java::jdt::m3::AST;
+import lang::java::jdt::m3::Core;
 
-public str t1 = "Hello, World!";
-public M3 model;
-public int volume					= 0;
-public map[loc,M3] m3s 				= ();
-public map[loc,Declaration] asts 	= ();
-public map[loc,str] filestr			= ();
-public map[loc,list[str]] filearr	= ();
-public map[loc,int] unitsize			= ();
-public map[loc,int] unitcc			= ();
+public map[str,int] ccAggregate	= ("low":0, "moderate":0, "high":0, "very high":0);
+public map[str,int] volAggregate	= ("low":0, "moderate":0, "high":0, "very high":0);
 
 void check(loc project)
 {
@@ -30,51 +20,47 @@ void check(loc project)
 
 void check(M3 m)
 {
-	volume = 0;
-	m3s = ();
-	asts = ();
-	filearr = ();
-	filearr = ();
-	unitsize = ();
-	unitcc = ();
-	
-	int volume				= getVolume(m);
-	map[loc,int] unitSizes 	= getUnitSize(m);
-	
-	println();
-	
-	map[loc,int] unitCCs		= getCyclomaticComplexity(m);
+	int volume			= getVolume(m);
+	map[loc,int] unitCCs	= getCyclomaticComplexity(m);
 	
 	println("Volume: <volume>");
-	allUnits = domain(unitsize) + domain(unitcc);
-	for(f <- sort(allUnits))
+	println("Complexity");
+	for(c <- ccAggregate)
 	{
-		if(isMethod(f))
-		{
-			s = (f notin unitsize)? -1 : unitsize[f];
-			c = (f notin unitcc)? -1 : unitcc[f];
-			println("<f>");
-			println("  loc:  <s>");
-			println("  cc:   <c>");
-			println("");
-		}
+		println("<left(c,10," ")> <percent(ccAggregate[c],volume)>%");
+	}
+	println("Unit size");
+	for(c <- volAggregate)
+	{
+		println("<left(c,10," ")> <percent(volAggregate[c],volume)>%");
 	}
 }
 
 public int getVolume(M3 m)
 {
-	if(volume == 0) volume = (0 | it + _getUnitSize(c) | c <- classes(m));
-	return volume;
+	return (0 | it + getUnitSize(l) | l <- files(m));
 }
 
-public map[loc,int] getUnitSize(M3 m)
+public int getUnitCC(Declaration d)
 {
-	map [loc,int] unitCCs = ();
-	for(<c,f> <- declaredMethods(m))
+	cc = 1;
+	visit (d)
 	{
-		if(exists(f)) unitCCs[f] = _getUnitSize(f);
+		case \case(_): cc += 1;
+		case \catch(_,_): cc += 1;
+		case \conditional(_,_,_): cc += 1;
+		case \do(_,_): cc += 1;
+		case \for(_,_,_): cc += 1;
+		case \for(_,_,_,_): cc += 1;
+		case \foreach(_,_,_): cc += 1;
+		case \if(_,_): cc += 1;
+		case \if(_,_,_): cc += 1;
+		case \infix(_,"&&",_): cc += 1;
+		case \infix(_,"||",_): cc += 1;
+		case \infix(_,"^",_): cc += 1;
+		case \while(_,_): cc += 1;
 	}
-	return unitCCs;
+	return cc;
 }
 
 public map[loc,int] getCyclomaticComplexity(M3 m)
@@ -82,148 +68,169 @@ public map[loc,int] getCyclomaticComplexity(M3 m)
 	map [loc,int] unitCCs = ();
 	for(l <- files(m))
 	{
-		a 	= _getClassAst(l);
-		for(f <- [d | /Declaration d := a, isMethod(d.decl)])
-		{
-			cc 	= 0;
-			visit(f)
-			{
-				case \method(Type \return, str name, list[Declaration] parameters, list[Expression] exceptions): cc = -1;
-				case \method(_,_,_,_, Statement impl): cc = _getUnitCC(f);
-				case \constructor(_,_,_, Statement impl): cc = _getUnitCC(f);
-			}
-			if(cc > 0) unitCCs[f.decl] = cc;
-		}
+		unitCCs += getCyclomaticComplexity(l);
 	}
-	
 	return unitCCs;
 }
 
-public str getCyclomaticComplexityRanking(M3 m)
+public map[loc,int] getCyclomaticComplexity(loc l)
 {
-	real v	= toReal(getVolume(m));
-	s		= 0;
-	c		= 0;
-	u		= 0;
-	ccs 		= getCyclomaticComplexity(m);
-	
-	for(f <- methods(m))
-	{
-		if(f in unitsize) 	println("size: <unitsize[f]>");
-		if(f in unitcc)		println("cc:   <unitcc[f]>");
-		println("");
-		if(ccs[f] <= 20) s += _getUnitSize(f);
-		else if(ccs[f] <= 50) c += _getUnitSize(f);
-		else u += _getUnitSize(f);
-	}
-	ps = 100 * (s/v);
-	pc = 100 * (c/v);
-	pu = 100 * (u/v);
-	println("Volume: <getVolume(m)>");
-	println("Moderate:  <s> --\> <ps>%");
-	println("High:      <c> --\> <pc>%");
-	println("Very high: <u> --\> <pu>%");
-	if(ps <= 25 && pc == 0 && pu == 0) return "++";
-	if(ps <= 30 && pc <= 5 && pu == 0) return "+";
-	if(ps <= 40 && pc <= 10 && pu == 0) return "o";
-	if(ps <= 50 && pc <= 15 && pu <= 5) return "-";
-	return "--";
-}
-//Get LOC in unit
-public int _getUnitSize(loc f)
-{
-	if(!exists(f)) return 0;
-	if(f notin unitsize)
-	{
-		m			= _getUnitM3(f);
-		content		= size(_getFileLOContentAsArray(f));
-		comments		= _getFileLOComments(m);
-		unitsize[f] = content-comments;
-	}
-	
-	return unitsize[f];
+	ast = createAstFromFile(l, true);
+	return getCyclomaticComplexity(ast);
 }
 
-public int _getUnitCC(Declaration d)
+public map[loc,int] getCyclomaticComplexity(Declaration c)
 {
-	cc = 1;
-	key = d.decl;
-	if(key notin unitcc)
+	map [loc,int] unitCCs = ();
+	for(f <- [d | /Declaration d := c, isMethod(d.decl)])
 	{
-		visit (d)
+		cc	= getUnitCC(f);
+		vol	= getUnitSize(f.src);
+		ccAggregate[getUnitCCClass(cc)]		+= vol;
+		volAggregate[getUnitSizeClass(vol)]	+= vol;
+	}
+	return unitCCs;
+}
+
+public str getUnitCCClass(int cc)
+{
+	if(cc <= 6)	return "low";
+	if(cc <= 8)	return "moderate";
+	if(cc <= 14)	return "high";
+	return "very high";
+}
+
+public int getUnitSize(loc f)
+{
+	ls	= readFileLines(f);
+	ls -= getBlankLines(ls);
+	ls -= getSLComments(ls);
+	ls -= getMLComments(ls);
+	return size(ls);
+}
+
+public map[loc,int] getUnitSizes(M3 m)
+{
+	map [loc,int] unitSizes = ();
+	for(l <- files(m))
+	{
+		unitSizes += getUnitSizes(l);
+	}
+	return unitSizes;
+}
+
+public map[loc,int] getUnitSizes(loc l)
+{
+	ast = createAstFromFile(f, true);
+	return getUnitSizes(ast);
+}
+
+public map[loc,int] getUnitSizes(Declaration c)
+{
+	map [loc,int] unitCCs = ();
+	for(f <- [d | /Declaration d := c, isMethod(d.decl)])
+	{
+		vol	= getUnitSize(f.src);
+		volAggregate[getUnitSizeClass(vol)]	+= vol;
+	}
+	return unitCCs;
+}
+
+public str getUnitSizeClass(int vol)
+{
+	if(vol <= 30) return "low";
+	if(vol <= 44) return "moderate";
+	if(vol <= 74) return "high";
+	return "very high";
+}
+
+list[str] getBlankLines(list[str] lines)
+{
+	blankLines = [];
+	for(l <- lines)
+	{
+		if(trim(l) == "") blankLines += l;
+	}
+	return blankLines;
+}
+
+list[str] getSLComments(list[str] lines)
+{
+	slcomments = [];
+	for(l <- lines)
+	{
+		if(startsWith(trim(l),"//"))
 		{
-			case \case(_): cc += 1;
-			case \catch(_,_): cc += 1;
-			case \conditional(_,_,_): cc += 1;
-			case \do(_,_): cc += 1;
-			case \for(_,_,_): cc += 1;
-			case \for(_,_,_,_): cc += 1;
-			case \foreach(_,_,_): cc += 1;
-			case \if(_,_): cc += 1;
-			case \if(_,_,_): cc += 1;
-			case \infix(_,"&&",_): cc += 1;
-			case \infix(_,"||",_): cc += 1;
-			case \infix(_,"^",_): cc += 1;
-			case \while(_,_): cc += 1;
+			slcomments += l;
 		}
-		unitcc[key] = cc;
 	}
-	return unitcc[key];
+	return slcomments;
 }
 
-private M3 _getUnitM3(loc f)
+list[str] getMLComments(list[str] lines)
 {
-	if(f notin m3s)
+	mlcomments = [];
+	inComment = false;
+	open = "/*";
+	close = "*/";
+	for(l <- lines)
 	{
-		s = _getFileLOContentAsString(f);
-		m = createM3FromString(f,s);
-		m3s[f] = m;
+		tl = trim(l);
+		if(contains(tl,"\"")) tl = cleanQuotedMLC(tl);
+		
+		if(contains(tl,open) && contains(tl,close))
+		{
+			if(isMixedLineMLC(tl)) mlcomments += l;
+			inComment = (findLast(tl,open) > findLast(tl,close))? true; false;
+		}
+		else if(contains(tl,open))
+		{
+			if(startsWith(tl,open)) mlcomments += l;
+			inComment = true;
+		}
+		else if(contains(tl,close))
+		{
+			if(endsWith(tl,close)) mlcomments += l;
+			inComment = false;
+		}
+		else if(inComment)
+		{
+			mlcomments += l;
+		}
 	}
-	
-	return m3s[f];
+	return mlcomments;
 }
 
-private Declaration _getClassAst(loc f)
+str cleanQuotedMLC(str s)
 {
-	if(f notin asts)
+	s = replaceAll(s, "\\\"", "");
+	newString = "";
+	while(/^<before:[^\"]*><oq:\"><enclosed:[^\"]*><cq:\"?><after:.*>$/ := s)
 	{
-		asts[f] = createAstFromFile(f, true);
+		enclosed = replaceAll(enclosed,"/*","");
+		enclosed = replaceAll(enclosed,"*/","");
+		newString += before + oq + enclosed + cq;
+		s = after;
 	}
-	
-	return asts[f];
+	return newString + s;
 }
 
-//Get no. lines of comments in model
-public int _getFileLOComments(M3 m)
+bool isMixedLineMLC(str s)
 {
-	allLines		= [<t.begin,t.end> | /<loc _, loc t> := m, t.begin?];
-	allComments	= [<c.begin,c.end> | /<loc _, loc c> := m.documentation, c.begin?];
-	onlyComments	= [<bl,el> | <<bl,_>,<el,_>> <- allComments] - [<bl,el> | <<bl,_>,<el,_>> <- allLines-allComments];
-	linesComms 	= [l | l <- [*[bl..el+1] | <bl,el> <- onlyComments]];
-	return size(linesComms);
-}
-
-//Get list of file lines that aren't blank
-private list[str] _getFileLOContentAsArray(loc f)
-{
-	if(f notin filearr)
+	open = "/*";
+	close = "*/";
+	comment = "";
+	pairs = [];
+	cs = findAll(s,close);
+	os = findAll(s,open);
+	for(c <- cs)
 	{
-		//Lines that aren't blank
-		filearr[f] = [l | l <- readFileLines(f), ! /^\s*$/ := l];
+		beforeC	= takeWhile(os,bool (int x){return c > x;});
+		os 		= drop(size(beforeC),os);
+		if(!isEmpty(beforeC))
+		{
+			comment += substring(s,top(beforeC),c+2);
+		}
 	}
-
-	return filearr[f];
+	return (comment == s);
 }
-
-//Get file lines that aren't blank
-private str _getFileLOContentAsString(loc f)
-{
-	if(f notin filestr)
-	{
-		ls = _getFileLOContentAsArray(f);
-		filestr[f] = intercalate("\n",ls);
-	}
-
-	return filestr[f];
-}
-
