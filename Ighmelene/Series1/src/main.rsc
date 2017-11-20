@@ -244,8 +244,8 @@ public int getUnitSize(loc f)
 	{
 		ls	= readFileLines(f);
 		ls -= getBlankLines(ls);
-		ls -= getSLComments(ls);
 		ls -= getMLComments(ls);
+		ls -= getSLComments(ls);
 		unitSizes[f] = size(ls);
 	}
 	return unitSizes[f];

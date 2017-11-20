@@ -19,8 +19,8 @@ list[str] cleanFile(loc f)
 		ls	= readFileLines(f);
 		ls 	= [trim(l) | l <- ls];
 		ls -= getBlankLines(ls);
-		ls -= getSLComments(ls);
 		ls -= getMLComments(ls);
+		ls -= getSLComments(ls);
 		ls	= removeAccolades(ls);
 		ls -= getBlankLines(ls);
 		ls	= removeMultipleWhitespaces(ls);
