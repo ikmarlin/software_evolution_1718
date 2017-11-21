@@ -33,10 +33,8 @@ import metrics::CalculateUnitSize;
 
 alias ComplexityRisksPercentages = tuple[real low, real moderate, real high, real veryHigh];
 
-public ComplexityRisksPercentages getComplexityRisksPercentages(M3 model) {
+public ComplexityRisksPercentages getComplexityRisksPercentages(map[loc,int] unitsize) {
 // we need to categorize unit-size values between 4 different categories according to the definition of Cyclomatic complexity */
-	unitsize = getUnitsSize(model); // fill out unitsize global map[int,loc]
-	
 	list[int] unitsSizeList = [unitsize[l] | l <- unitsize];
 	int low = sum([unitSize | unitSize <- unitsSizeList, unitSize <= 10]);
 	int moderate = sum([unitSize | unitSize <- unitsSizeList, unitSize > 10 && unitSize <= 20]);

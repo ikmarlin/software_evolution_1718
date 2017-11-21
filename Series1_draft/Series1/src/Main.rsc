@@ -65,9 +65,9 @@ void main(){
 	println("***Unit-cc-ranking = <ccScale>");
 	
 	
-	//unitsize = getUnitsSize(model);
+	unitsize = getUnitsSize(model);
 	// is it needed? if not, then we add the line above to make sure the map is filled out
-	ComplexityRisksPercentages tup = getComplexityRisksPercentages(smallModel);
+	ComplexityRisksPercentages tup = getComplexityRisksPercentages(unitsize);
 	usScale = getUnitComplexityRanking(tup);
 	println ("***Complexity % based on unit-size = <tup>, <usScale>");
 	

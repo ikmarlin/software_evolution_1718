@@ -97,9 +97,9 @@ public int getCountAssertionStatements(M3 model, loc extendedTestClass) {
 			visit(f){
 				case \method(_,_,_,_,Statement impl): {
 					visit (impl){
-			         	case \assertTrue(_): counter += 1;
+			         	/*case \assertTrue(_): counter += 1;
 			         	case \assertFalse(_): counter += 1;
-			         	case \assertEquals(_ _): counter += 1;
+			         	case \assertEquals(_ _): counter += 1;*/
 			            case \assert(_): counter += 1;
 			            case \assert(Expression expression, Expression message): counter += 1;
 			            case \methodCall(bool isSuper, /assert/, list[Expression] arguments): counter += 1;

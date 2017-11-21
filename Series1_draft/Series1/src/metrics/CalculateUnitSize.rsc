@@ -20,6 +20,7 @@ import metrics::CalculateLOC;
 
 /* get unit-loc & unit size (method size), by counting LOC in each unit, excluding comments & empty lines */
 public map[loc,int] getUnitsSize(M3 model){
+	map[loc,int] unitsize = ();
 	for(<_,f> <- declaredMethods(model)){
 		if(exists(f)) unitsize[f] = countLOC(f); // RD method
 	}
@@ -30,11 +31,12 @@ public map[loc,int] getUnitsSize(M3 model){
 
 //TODO we might not need this!
 public real averageUnitsSize(M3 model) {
+	map[loc,int] unitsize = getUnitsSize(model);
 	int l = 0;
 	int sm = 0;
 	for (<_,f> <- declaredMethods(model)) {
 		if(exists(f)) {
-			sm += unitsSize[f];
+			sm += unitsize[f];
 			l += 1;
 		}
 	}

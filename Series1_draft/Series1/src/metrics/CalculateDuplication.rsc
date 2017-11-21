@@ -34,12 +34,15 @@ import metrics::SigModelScale;
 	-- 		20-100%
 */
 
+public int countCleanLOC = 0;
+
 /* count the LOC in the java project, on files level, based on the 6-line block concept */
 public int getCountLOCDuplication(M3 model) {
 	blocksOf6Lines = [];
 	//println("<size(extractFiles(model))>");
 	for (l <- extractFiles(model)) {
 		list[str] content = [trim(s) | s <- (getLOCNoCurlyBraces(l))]; // get LOC per file
+		countCleanLOC += size(content);
 		// ignore files that are shorter than 6 lines, exclusive comments, empty lines, leading spaces, and curly-braces
 		if (size(content) >= 6){ // for foles of loc >=6 we store all possible blocks with file location and block index (start-line)
 			blocksOf6Lines += [[l1,l2,l3,l4,l5,l6] | [_*,l1,l2,l3,l4,l5,l6,_*] := zip(content, index(content), [l | i <- [0..size(content)]])];
@@ -47,6 +50,7 @@ public int getCountLOCDuplication(M3 model) {
 		}
 	}
 	
+	println("volume after cleaning = <countCleanLOC>");
 	storage = ();
 	dups = {};
 	// scan list for possible duplicates
@@ -65,14 +69,14 @@ public int getCountLOCDuplication(M3 model) {
 	}
 	
 	//lines in dups are duplicated line, return size of list
-	println("dups: <dups>");
+	println("Duplicated LOC = <size(dups)>");
 	return size(dups);
 }
 
 
 public real getDuplicationRatio(M3 model) {
-	if(volume!=0) {
-	 	return toReal(getCountLOCDuplication(model))/toReal(volume)*100;
+	if(countCleanLOC!=0) {
+	 	return toReal(getCountLOCDuplication(model))/toReal(countCleanLOC)*100;
 	 } else {
 		println("calculate volume first");
 		return 0.;

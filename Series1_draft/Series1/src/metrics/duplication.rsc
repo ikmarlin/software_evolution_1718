@@ -13,7 +13,7 @@ import metrics::CalculateLOC;
 
 list[str] fileToBlocks(loc f, int n){
 	blocks	= [];
-	lines = getLOCNoCurlyBraces(f);
+	lines = [trim(l) | l <- getLOCNoCurlyBraces(f)];
 	maxI	= size(lines) - n - 1;
 	for(i <- [0..maxI]){
 		blocks  += intercalate(" ",slice(lines,i,n));
@@ -27,7 +27,7 @@ rel[str,int] duplicates(list[str] lines){
 }
 
 void getFileDupPercentage(loc f,int blockSize){
-	clean 	= getLOCNoCurlyBraces(f);
+	clean = [trim(l) | l <- getLOCNoCurlyBraces(f)];
 	blocks 	= fileToBlocks(clean,blockSize);
 	dups	= duplicates(blocks);
 	volume	= (0 | it + size(line) | line <- clean);
