@@ -16,14 +16,15 @@ import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import lang::java::jdt::m3::AST;
-import analysis::graphs::Graph;
 import Extractor;
 import utils::Tools;
+import metrics::SigModelScale;
 import metrics::CalculateVolume;
 import metrics::CalculateUnitSize;
 import metrics::CalculateUnitTesting;
 import metrics::CalculateDuplication;
 import metrics::CalculateCyclomaticComplexity;
+
 
 /* java projects of interest */
 public loc smallsql = |project://smallsql0.21_src/|;
@@ -49,14 +50,16 @@ void checkMaintainability(loc project, loc baseClass){
 
 void checkMaintainability(M3 m, loc baseClass){
  	int time = realTime();
-
-	println("***Start of demo .. analyzing code for project ...");	
-	println(left("",labelLength+intLength,"-"));
-	
-	int blockSize = 6;
+ 	int blockSize = 6;
 	int labelLength			= 20;
 	int intLength			= 8;
 	int percLength			= 7;
+
+	println("***Start of demo .. analyzing code for project ...");
+	//println("start time: <time>");
+	println(left("",labelLength+intLength,"--"));
+	
+	
 	int volume				= getVolume(m);
 	int duplication			= getDuplication(m, blockSize);
 	int unitTestCoverage 	= getUnitTestCoverage(m, baseClass);
@@ -82,7 +85,7 @@ void checkMaintainability(M3 m, loc baseClass){
 	print(left("Volume:",labelLength," "));
 	println(right("<volume>",intLength," "));
 	print(left("Rating:",labelLength," "));
-	println(right("<volRating>",intLength," "));
+	println(right("<sigScalesMap[volRating]>",intLength," "));
 	
 	println(left("",labelLength+intLength,"-"));
 	
@@ -93,7 +96,7 @@ void checkMaintainability(M3 m, loc baseClass){
 		println("<right("<percent(aggrSizes[classification],volume)>",percLength," ")>%");
 	}
 	print(left("Rating:",labelLength," "));
-	println(right("<unitSizeRating>",intLength," "));
+	println(right("<sigScalesMap[unitSizeRating]>",intLength," "));
 	
 	println(left("",labelLength+intLength,"-"));
 	
@@ -104,21 +107,21 @@ void checkMaintainability(M3 m, loc baseClass){
 		println("<right("<percent(aggrCCs[classification],volume)>",percLength," ")>%");
 	}
 	print(left("Rating:",labelLength," "));
-	println(right("<unitCCRating>",intLength," "));
+	println(right("<sigScalesMap[unitCCRating]>",intLength," "));
 	
 	println(left("",labelLength+intLength,"-"));
 	
 	print(left("Duplication:",labelLength," "));
 	println("<right("<duplication>",percLength," ")>%");
 	print(left("Rating:",labelLength," "));
-	println(right("<dupRating>",intLength," "));
+	println(right("<sigScalesMap[dupRating]>",intLength," "));
 	
 	println(left("",labelLength+intLength,"-"));
 	
 	print(left("Unit-testing:",labelLength," "));
 	println("<right("<unitTestCoverage>",percLength," ")>%");
 	print(left("Rating:",labelLength," "));
-	println(right("<unitTestCovRating>",intLength," "));
+	println(right("<sigScalesMap[unitTestCovRating]>",intLength," "));
 	print(left("Assert-count:",labelLength," "));
 	println(right("<assertCount>",intLength," "));
 	
@@ -126,17 +129,17 @@ void checkMaintainability(M3 m, loc baseClass){
 	
 	
 	print(left("Analysability:",labelLength," "));
-	println("<right("<analysability>",intLength," ")>");
+	println("<right("<sigScalesMap[analysability]>",intLength," ")>");
 	print(left("Changeability:",labelLength," "));
-	println(right("<changeability>",intLength," "));
+	println(right("<sigScalesMap[changeability]>",intLength," "));
 	print(left("Testability:",labelLength," "));
-	println(right("<testability>",intLength," "));
+	println(right("<sigScalesMap[testability]>",intLength," "));
 	print(left("Stability:",labelLength," "));
-	println(right("<unitTestCovRating>",intLength," "));
+	println(right("<sigScalesMap[unitTestCovRating]>",intLength," "));
 	print(left("Maintainability:",labelLength," "));
-	println("<right("<maintainability>",intLength," ")>");
-	
-	println("***demo time: <time/10000000000> seconds");
+	println("<right("<sigScalesMap[maintainability]>",intLength," ")>");
+	//println("End time: <realTime()>");
+	println("***demo time: <(realTime()-time)/1000> seconds");
 	println("***End of demo...");
 }
 
