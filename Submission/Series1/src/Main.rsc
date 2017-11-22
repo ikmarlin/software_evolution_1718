@@ -49,7 +49,10 @@ void checkMaintainability(loc project, loc baseClass){
 
 void checkMaintainability(M3 m, loc baseClass){
  	int time = realTime();
-	println("***Start of demo .. analyzing code for project ...");
+
+	println("***Start of demo .. analyzing code for project ...");	
+	println(left("",labelLength+intLength,"-"));
+	
 	int blockSize = 6;
 	int labelLength			= 20;
 	int intLength			= 8;
@@ -133,7 +136,7 @@ void checkMaintainability(M3 m, loc baseClass){
 	print(left("Maintainability:",labelLength," "));
 	println("<right("<maintainability>",intLength," ")>");
 	
-	println("***demo time: <time/10000000>");
+	println("***demo time: <time/10000000000> seconds");
 	println("***End of demo...");
 }
 
