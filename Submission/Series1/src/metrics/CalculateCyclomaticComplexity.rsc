@@ -12,7 +12,6 @@ import lang::java::jdt::m3::AST;
 import Main;
 import Extractor;
 import metrics::SigModelScale;
-import metrics::CalculateLOC;
 import metrics::CalculateVolume;
 
 /* get cyclomatic-complexity for complete project */

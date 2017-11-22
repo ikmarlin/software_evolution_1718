@@ -16,7 +16,6 @@ import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import lang::java::jdt::m3::AST;
-import lang::java::\syntax::Java15;
 import analysis::graphs::Graph;
 import Extractor;
 import utils::Tools;
@@ -30,19 +29,25 @@ import metrics::CalculateCyclomaticComplexity;
 public loc smallsql = |project://smallsql0.21_src/|;
 public loc hsqldb   = |project://hsqldb-2.3.1/|;
 
-/* create a model from eclipse project*/
-public M3 getModelForProject(loc projectLoc) =  createM3FromEclipseProject(projectLoc);
 
-/* models of interest */
-//public M3 smallModel = getModelForProject(smallsql);
-//public M3 hsModel    = getModelForProject(hsqldb);
+/* test-classes of interest */
+public loc baseClassSmall	= |java+class:///smallsql/junit/BasicTestCase|;
+public loc baseClassHQ 	= |java+class:///org/hsqldb/test/TestBase|;
 
 /* public maps to store intermediate or final output */
 public map[loc,int]	unitCCs			= ();
 public map[loc,M3] models			= ();
 public map[loc,Declaration] asts	= ();
 
-void checkMaintainability(M3 m){
+//checkMaintainability(smallsql, baseClassSmall);
+//checkMaintainability(hsqldb, baseClassHQ);
+
+void checkMaintainability(loc project, loc baseClass){
+	model = createM3FromEclipseProject(project);
+	checkMaintainability(model, baseClass);
+}
+
+void checkMaintainability(M3 m, loc baseClass){
  	int time = realTime();
 	println("***Start of demo .. analyzing code for project ...");
 	int blockSize = 6;
@@ -51,8 +56,8 @@ void checkMaintainability(M3 m){
 	int percLength			= 7;
 	int volume				= getVolume(m);
 	int duplication			= getDuplication(m, blockSize);
-	int unitTestCoverage 	= getUnitTestCoverage(m, [|java+class:///smallsql/junit/BasicTestCase|]);
-	int assertCount 		= getCountAssertionStatements(m, |java+class:///smallsql/junit/BasicTestCase|);
+	int unitTestCoverage 	= getUnitTestCoverage(m, baseClass);
+	int assertCount 		= getCountAssertionStatements(m, baseClass);
 	map[loc,int] sizes		= getUnitSizes(m);
 	map[loc,int] ccs		= getCyclomaticComplexity(m);
 	map[str,int] aggrSizes	= aggrUnitSizes(sizes);
@@ -128,7 +133,7 @@ void checkMaintainability(M3 m){
 	print(left("Maintainability:",labelLength," "));
 	println("<right("<maintainability>",intLength," ")>");
 	
-	println("***demo time: <time/1000.0> seconds");
+	println("***demo time: <time/10000000>");
 	println("***End of demo...");
 }
 

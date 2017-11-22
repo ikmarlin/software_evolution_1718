@@ -29,25 +29,21 @@ import metrics::SigModelScale;
 *
 */
 
-list[loc] extractBaseTestClasses(M3 model) = [from | <from,to> <- model.extends, to == "TestCase"];
+//list[loc] extractBaseTestClasses(M3 model) = [from | <from,to> <- model.extends, to == "TestCase"];
 
 /* get all methods in test-units */
-list[loc] extractTestsMethods(M3 model, list[loc] extendedTestClasses) {
-	list[loc] junitClasses = [];
-	for (cl <- extendedTestClasses) {
-		junitClasses += [from | <from,to> <- model.extends, to == cl];
-	}
-	//println("<size(junitClasses)>");
-	int s = size([m | c <- junitClasses, m <- methods(model, c)]);
-	//println("tests methods = <s>");
+list[loc] extractTestsMethods(M3 model, loc extendedTestClass) {
+	list[loc] junitClasses = 
+		[from | <from,to> <- model.extends, to == extendedTestClass];   
+   // println("<junitClasses>");
     return [m | c <- junitClasses, m <- methods(model, c)];
 }
 
 
 /* get methods that are called from test-units */
-list[loc] extractCalledMethods(M3 model, list[loc] extendedTestClasses) {
+list[loc] extractCalledMethods(M3 model, loc extendedTestClass) {
 	// grep all methods that are in a class  for testing (extends BasicTestCase)
-    list[loc] ms = extractTestsMethods(model, extendedTestClasses);
+    list[loc] ms = extractTestsMethods(model, extendedTestClass);
     list[loc] result = [];
     for (<caller, called> <- model.methodInvocation) {
     	if (caller in ms && called notin ms) {
@@ -59,12 +55,12 @@ list[loc] extractCalledMethods(M3 model, list[loc] extendedTestClasses) {
 
 
 /* calculate the unit-test-coverage, it is needed for test-quality */
-public int getUnitTestCoverage(M3 model, list[loc] extendedTestClasses) {
-	int methodsTested = 
-	 size([m | m <- methods(model), m notin extractTestsMethods(model, extendedTestClasses)]);
-	int calledMethods = size(extractCalledMethods(model, extendedTestClasses));
-	//println("<methodsTested>, <calledMethods>");
-	if (methodsTested !=0) return (calledMethods/methodsTested)*100; else return 0;
+public int getUnitTestCoverage(M3 model, loc extendedTestClass) {
+	int methodsToTest = 
+	 size([m | m <- methods(model), m notin extractTestsMethods(model, extendedTestClass)]);
+	int calledMethods = size(extractCalledMethods(model, extendedTestClass));
+	//println("<methodsToTest>, <calledMethods>");
+	if (methodsToTest !=0) return percent(calledMethods,methodsToTest); else return 0;
 }
 
 
@@ -91,10 +87,11 @@ public int getCountAssertionStatements(M3 model, loc extendedTestClass) {
 			visit(f){
 				case \method(_,_,_,_,Statement impl): {
 					visit (impl){
-						// assert, assertTrue, assertFalse, assertEquals...
+						// assert, assertTrue, assertFalse, assertEquals ..etc..
 			            case \assert(_): counter += 1;
 			            case \assert(Expression expression, Expression message): counter += 1;
-			            case \methodCall(bool isSuper, /^assert/, list[Expression] arguments): counter += 1;			 		}
+			            case \methodCall(bool isSuper, /^assert/, list[Expression] arguments): counter += 1;			 		
+			        }
 				};
 			}
 		}
