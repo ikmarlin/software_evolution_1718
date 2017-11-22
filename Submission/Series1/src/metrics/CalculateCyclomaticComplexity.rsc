@@ -6,11 +6,8 @@ module metrics::CalculateCyclomaticComplexity
  */
 import IO;
 import util::Math;
-import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
-import lang::java::m3::AST;
 import lang::java::jdt::m3::AST;
-import lang::java::\syntax::Java15;
 
 import Main;
 import Extractor;

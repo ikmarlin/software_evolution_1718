@@ -18,32 +18,18 @@ import utils::Tools;
 import metrics::CalculateLOC;
 
 
+/* We can calculate the unit size rating of a project
+*	     maximum relative LOC
+*	#    #####################
+*	rank# moderate high very-high
+*	 ++     25%     0%    0%
+*	 +      30%      5%    0%
+*	 o      40%     10%   0%
+*	 -      50%     15%   5%
+*	 --      -       -     -    default
+*/
+
 /* get unit-loc & unit size (method size), by counting LOC in each unit, excluding comments & empty lines */
-public map[loc,int] getUnitsSize(M3 model){
-	map[loc,int] unitsize = ();
-	for(<_,f> <- declaredMethods(model)){
-		if(exists(f)) unitsize[f] = countLOC(f);
-	}
-	//println("<unitsize>");
-	return unitsize;
-}
-
-
-//TODO we might not need this!
-public real averageUnitsSize(M3 model) {
-	map[loc,int] unitsize = getUnitsSize(model);
-	int l = 0;
-	int sm = 0;
-	for (<_,f> <- declaredMethods(model)) {
-		if(exists(f)) {
-			sm += unitsize[f];
-			l += 1;
-		}
-	}
-	if (l!=0) return toReal(sm)/toReal(l); else return 0;
-}
-
-// ighmelene
 public map[loc,int] getUnitSizes(M3 model) {
 	map [loc,int] sizes = ();
 	for(l <- files(model))	{
@@ -95,4 +81,5 @@ int getUnitSizeRating(map[str,int] aggr, int volume) {
 	if(moderate <= 50 && high <= 15 && veryHigh <= 5) return sigScales[3];
 	return sigScales[4];
 }
+
 

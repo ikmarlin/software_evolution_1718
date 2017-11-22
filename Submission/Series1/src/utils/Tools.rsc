@@ -118,8 +118,33 @@ bool isMixedLineMLC(str s) {
 	return (comment == s);
 }
 
+
+list[str] removeAccolades(list[str] lines) {
+	clean = [];
+	for(l <- lines) 	{
+		l = replaceAll(l,"{"," ");
+		l = replaceAll(l,"}"," ");
+		clean += trim(l);
+	}
+	return clean;
+}
+
+list[str] removeMultipleWhitespaces(list[str] lines) {
+	clean = [];
+	for(line <- lines) 	{
+		cleanLine = "";
+		while (/^<before:\S*><ws:\s+><after:.*$>/ := line) 		{ 
+			cleanLine += before + " ";
+			line = after;
+		}
+		cleanLine += line;
+		clean += trim(cleanLine);
+	}
+	return clean;
+}
+
 /* get average of a list of integers, round result to int */
-int average(list[int] vals){
+int average(list[int] vals) {
 	int amount	= size(vals);
 	real total	= toReal(sum(vals));
 	return round(total/amount);

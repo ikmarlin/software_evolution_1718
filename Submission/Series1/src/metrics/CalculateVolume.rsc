@@ -33,12 +33,8 @@ import metrics::CalculateUnitSize;
 *		##############
 */
 
-
-/* calculate volume based on classes in java project - Halstead volume */
-public int getVolumeAllClasses(M3 model) = (0 | it + countLOC(c) | c <- extractClasses(model)); 
-
 /* calculate volume based on files in java project */
-public int getVolumeAllFiles(M3 model)   = (0 | it + countLOC(f) | f <- extractFiles(model)); 
+public int getVolume(M3 m) = (0 | it + getUnitSize(l) | l <- files(m));
 
 /* get sig ranking string based on volume */
 public str getVolumeRating(int vol) {
@@ -48,6 +44,3 @@ public str getVolumeRating(int vol) {
 	if(vol <= 1310000) return sigScales[3];
 	return sigScales[4];
 }
-
-// ighmelene
-public int getVolume(M3 m) = (0 | it + getUnitSize(l) | l <- files(m));
