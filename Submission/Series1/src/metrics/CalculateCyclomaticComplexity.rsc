@@ -53,7 +53,6 @@ public int getUnitCC(Declaration d) {
 			case \if(_,_,_): cc += 1;
 			case \infix(_,"&&",_): cc += 1;
 			case \infix(_,"||",_): cc += 1;
-			case \infix(_,"^",_): cc += 1;
 			case \while(_,_): cc += 1;
 		}
 		unitCCs[d.src] = cc;
