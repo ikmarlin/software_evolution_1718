@@ -94,7 +94,7 @@ int getDuplication(M3 m, int blockSize) {
 }
 
 /*  get sig-model rankining based on the duplicates ratio */
-public str getDuplicationRating(real ratio) {
+public int getDuplicationRating(real ratio) {
 	if(ratio <=3) return sigScales[0]; // ++
 	if(ratio <=5)return sigScales[1]; // +
 	if(ratio <=10) return sigScales[2]; // o

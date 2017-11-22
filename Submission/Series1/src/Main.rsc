@@ -23,7 +23,6 @@ import metrics::CalculateVolume;
 import metrics::CalculateUnitSize;
 import metrics::CalculateUnitTesting;
 import metrics::CalculateDuplication;
-import metrics::CalculateUnitComplexity;
 import metrics::CalculateCyclomaticComplexity;
 
 /* java projects of interest */
@@ -38,82 +37,107 @@ public M3 getModelForProject(loc projectLoc) =  createM3FromEclipseProject(proje
 //public M3 hsModel    = getModelForProject(hsqldb);
 
 /* public maps to store intermediate or final output */
-public int volume					= 0;
-public map[loc,M3] m3s 				= ();
-public map[loc,Declaration] asts 	= ();
-public map[loc,str] filestr			= ();
-public map[loc,list[str]] filearr	= ();
-public map[loc,int] unitsize		= ();
-public map[loc,int] unitcc			= ();
+public map[loc,int]	unitSizes		= ();
+public map[loc,int]	unitCCs			= ();
+public map[loc,M3] models			= ();
+public map[loc,Declaration] asts	= ();
 
-void main(){
+int blockSize = 6;
+
+void checkMaintainability(M3 m){
  	int time = realTime();
-	println("***Start of demo .. analyzing code for project smallsql...");
+	println("***Start of demo .. analyzing code for project ...");
+	int volume				= getVolume(m);
+	int duplication			= getDuplication(m, blockSize);
+	int unitTestCoverage 	= getUnitTestCoverage(m, [|java+class:///smallsql/junit/BasicTestCase|]);
+	int assertCount 		= getCountAssertionStatements(m, |java+class:///smallsql/junit/BasicTestCase|);
+	map[loc,int] sizes		= getUnitSizes(m);
+	map[loc,int] ccs		= getCyclomaticComplexity(m);
+	map[str,int] aggrSizes	= aggrUnitSizes(sizes);
+	map[str,int] aggrCCs	= aggrUnitCCs(ccs,sizes);
+	list[str] sizeClasses 	= ["low","moderate","high","very high"];
+	list[str] ccClasses 	= ["low","moderate","high","very high"];
+	int volRating			= getVolumeRating(volume);
+	int unitCCRating		= getCyclomaticComplexityRating(aggrCCs,volume);
+	int dupRating			= getDuplicationRating(duplication);
+	int unitSizeRating		= getUnitSizeRating(aggrSizes,volume);
+	int unitTestCovRating   = getUnitTestCoverageRanking(unitTestCoverage);
+	int analysability		= getAnalysabilityRating(volRating,dupRating,unitSizeRating,unitTestCovRating);
+	int changeability		= getChangeabilityRating(unitCCRating,dupRating);
+	int testability			= getTestabilityRating(unitCCRating,unitSizeRating,unitTestCovRating);
+	int stability 			= unitTestCovRating;
+	int maintainability		= getMaintainabilityRating(analysability,changeability,testability,stability);
 	
-	volume = getVolumeAllFiles(smallModel);
-	str volScale = getVolumeRating(volume);
-	println("***Code volume = <volume> LOC : <volScale>");
-	
-	real dupsRatio = getDuplicationRatio(smallModel);
-	str dupsScale = getDuplicationRating(dupsRatio);
-	println("***Code duplication = <dupsRatio>% : <dupsScale>");
 
+	print(left("Volume:",labelLength," "));
+	println(right("<volume>",intLength," "));
+	print(left("Rating:",labelLength," "));
+	println(right("<volRating>",intLength," "));
 	
-	str ccScale = getCyclomaticComplexityRating(smallModel);
-	println("***Unit-cc-ranking = <ccScale>");
+	println(left("",labelLength+intLength,"-"));
+	
+	println(left("Unit size:",labelLength," "));
+	for(classification <- sizeClasses)
+	{
+		print(left("<classification>:",labelLength," "));
+		println("<right("<percent(aggrSizes[classification],volume)>",percLength," ")>%");
+	}
+	print(left("Rating:",labelLength," "));
+	println(right("<unitSizeRating>",intLength," "));
+	
+	println(left("",labelLength+intLength,"-"));
+	
+	println(left("Complexity:",labelLength," "));
+	for(classification <- ccClasses)
+	{
+		print(left("<classification>:",labelLength," "));
+		println("<right("<percent(aggrCCs[classification],volume)>",percLength," ")>%");
+	}
+	print(left("Rating:",labelLength," "));
+	println(right("<unitCCRating>",intLength," "));
+	
+	println(left("",labelLength+intLength,"-"));
+	
+	print(left("Duplication:",labelLength," "));
+	println("<right("<duplication>",percLength," ")>%");
+	print(left("Rating:",labelLength," "));
+	println(right("<dupRating>",intLength," "));
+	
+	println(left("",labelLength+intLength,"-"));
+	
+	print(left("Unit-testing:",labelLength," "));
+	println("<right("<unitTestCoverage>",percLength," ")>%");
+	print(left("Rating:",labelLength," "));
+	println(right("<unitTestCovRating>",intLength," "));
+	print(left("Assert-count:",labelLength," "));
+	println(right("<assertCount>",intLength," "));
+	
+	println(left("",labelLength+intLength,"-"));
 	
 	
-	unitsize = getUnitsSize(model);
-	// is it needed? if not, then we add the line above to make sure the map is filled out
-	ComplexityRisksPercentages tup = getComplexityRisksPercentages(unitsize);
-	usScale = getUnitComplexityRanking(tup);
-	println ("***Complexity % based on unit-size = <tup>, <usScale>");
-	
-	
-	real coverage = getUnitTestCoverage(smallModel, |java+class:///smallsql/junit/BasicTestCase|);
-	str utscale = getUnitTestCoverageRanking(coverage);
-	println("***Unit-test-coverage = <coverage>% : <utscale>");
-	//getCountAssertionStatements(smallModel, |java+class:///smallsql/junit/BasicTestCase|);
-	
-	println("###########Maintainability aspects#############");
-	changeability(ccScale, dupsScale);
-	testability(ccScale, utscale);
-	analysability(volScale, dupsScale, utscale, usScale);
-	stability(utscale);
-	
-	// overall
-	//maintainability(smallModel);
+	print(left("Analysability:",labelLength," "));
+	println("<right("<analysability>",intLength," ")>");
+	print(left("Changeability:",labelLength," "));
+	println(right("<changeability>",intLength," "));
+	print(left("Testability:",labelLength," "));
+	println(right("<testability>",intLength," "));
+	print(left("Stability:",labelLength," "));
+	println(right("<unitTestCovRating>",intLength," "));
+	print(left("Maintainability:",labelLength," "));
+	println("<right("<maintainability>",intLength," ")>");
 	
 	debug("***demo time: <time/1000.0> seconds");
 	println("***End of demo...");
 }
 
+int getAnalysabilityRating(int volRating, int dupRating, int unitSizeRating, int unitTestCovRating) 
+	= average([volRating,dupRating,unitSizeRating,unitTestCovRating]);
 
-// TODO review how we get the overall ranking per aspect
-void analysability(str vol, str dupl, str ut, str us){
-	int volVal = sigScalesMap[vol];
-	int duplval = sigScalesMap[dupl];
-	int utVal = sigScalesMap[ut];
-	int usVal = sigScalesMap[us];
-	int anScale = toInt((volVal+duplval+utVal+usVal)/4);
-	println("Analysability ranking <anScale>");
-}
+int getChangeabilityRating(int unitCCRating, int dupRating)
+	=  average([unitCCRating,dupRating]);
 
-void changeability(str cc, str dupl){
-	int ccval = sigScalesMap[cc];
-	int duplval = sigScalesMap[dupl];
-	int chScale = toInt((ccval+duplval)/2);
-	println("Changeability ranking <chScale>");
-}
-
-void testability(str cc, str ut){
-	int ccval = sigScalesMap[cc];
-	int utVal = sigScalesMap[ut];
-	int tsScale = toInt((ccval+utVal)/2);
-	println("Testability <tsScale>");
-}
-
-// bonus
-void stability(str ut){
-	println("Stability ranking <ut>");
-}
+int getTestabilityRating(int unitCCRating, int unitSizeRating, int unitTestCovRating) 
+	= average([unitCCRating,unitSizeRating,unitTestCovRating]);
+	
+int getMaintainabilityRating(int analysability, int changeability, int testability, int stability) 
+	= average([analysability,changeability,testability,stability]);

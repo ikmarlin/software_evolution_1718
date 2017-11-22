@@ -78,7 +78,7 @@ public real getUnitTestCoverage(M3 model, list[loc] extendedTestClasses) {
 
 
 /* get sig-model ranking for unit-test-coverage */
-public str getUnitTestCoverageRanking(real ratio) {
+public int getUnitTestCoverageRanking(real ratio) {
 	if(ratio >=95) return sigScales[0]; // ++
 	if(ratio >=80)  return sigScales[1]; // +
 	if(ratio >=60)  return sigScales[2]; // o
@@ -95,7 +95,7 @@ public int getCountAssertionStatements(M3 model, loc extendedTestClass) {
    
     for(c <- junitClasses){
     	counter 	= 0;
-		a 	= _getClassAst(c);
+		a 	= getFileAst(c);
 		for(f <- [d | /Declaration d := a, isMethod(d.decl)]){
 			visit(f){
 				case \method(_,_,_,_,Statement impl): {
