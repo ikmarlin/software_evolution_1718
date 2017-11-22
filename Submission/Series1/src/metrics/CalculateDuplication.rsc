@@ -12,10 +12,7 @@ import Relation;
 import Map;
 import util::Math;
 import util::FileSystem;
-import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
-import lang::java::m3::AST;
-import lang::java::\syntax::Java15;
 import Main;
 import Extractor;
 import utils::Tools;
@@ -53,14 +50,14 @@ list[str] cleanFile(loc f) {
 /* extract blocks of n lines from a file */
 rel[loc,int,int,Block] fileToBlocks(loc file, int blockSize) {
 	blocks	= {};
-	lines 	= cleanFile(file);	
+	Block lines = cleanFile(file);	
 	maxI		= size(lines) - blockSize;
 	
 	if(maxI < 0) return blocks;
 	
 	for(i <- [0..maxI+1]) {
-		block	 = slice(lines,i,blockSize);  
-		blocks	+= <file,i,blockSize,block>;
+		Block block	 = slice(lines,i,blockSize);  
+		blocks		+= <file,i,blockSize,block>;
 	}
 	return blocks;
 }
@@ -94,7 +91,7 @@ int getDuplication(M3 m, int blockSize) {
 }
 
 /*  get sig-model rankining based on the duplicates ratio */
-public int getDuplicationRating(real ratio) {
+public int getDuplicationRating(int ratio) {
 	if(ratio <=3) return sigScales[0]; // ++
 	if(ratio <=5)return sigScales[1]; // +
 	if(ratio <=10) return sigScales[2]; // o

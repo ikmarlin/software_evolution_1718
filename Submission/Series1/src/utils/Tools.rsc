@@ -6,6 +6,7 @@ module utils::Tools
  */
 import IO;
 import String;
+import List;
 import util::Math;
 
 public str newLine = "\n";

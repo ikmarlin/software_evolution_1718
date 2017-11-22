@@ -9,13 +9,11 @@ import String;
 import List;
 import util::Math;
 import util::FileSystem;
-import lang::java::m3::Core;
 import lang::java::jdt::m3::Core;
-import lang::java::\syntax::Java15;
-import Main;
+import lang::java::jdt::m3::AST;
 import Extractor;
 import utils::Tools;
-import metrics::CalculateLOC;
+import metrics::SigModelScale;
 
 
 /* We can calculate the unit size rating of a project
@@ -28,6 +26,8 @@ import metrics::CalculateLOC;
 *	 -      50%     15%   5%
 *	 --      -       -     -    default
 */
+
+public map[loc,int]	unitSizes		= ();
 
 /* get unit-loc & unit size (method size), by counting LOC in each unit, excluding comments & empty lines */
 public map[loc,int] getUnitSizes(M3 model) {
@@ -82,4 +82,10 @@ int getUnitSizeRating(map[str,int] aggr, int volume) {
 	return sigScales[4];
 }
 
+public str getUnitSizeClass(int vol) {
+	if(vol <= 30) return "low";
+	if(vol <= 44) return "moderate";
+	if(vol <= 74) return "high";
+	return "very high";
+}
 

@@ -9,6 +9,7 @@ import String;
 import List;
 import Set;
 import Map;
+import util::Math;
 import util::Benchmark;
 import util::FileSystem;
 import lang::java::m3::Core;
@@ -37,16 +38,17 @@ public M3 getModelForProject(loc projectLoc) =  createM3FromEclipseProject(proje
 //public M3 hsModel    = getModelForProject(hsqldb);
 
 /* public maps to store intermediate or final output */
-public map[loc,int]	unitSizes		= ();
 public map[loc,int]	unitCCs			= ();
 public map[loc,M3] models			= ();
 public map[loc,Declaration] asts	= ();
 
-int blockSize = 6;
-
 void checkMaintainability(M3 m){
  	int time = realTime();
 	println("***Start of demo .. analyzing code for project ...");
+	int blockSize = 6;
+	int labelLength			= 20;
+	int intLength			= 8;
+	int percLength			= 7;
 	int volume				= getVolume(m);
 	int duplication			= getDuplication(m, blockSize);
 	int unitTestCoverage 	= getUnitTestCoverage(m, [|java+class:///smallsql/junit/BasicTestCase|]);
@@ -126,7 +128,7 @@ void checkMaintainability(M3 m){
 	print(left("Maintainability:",labelLength," "));
 	println("<right("<maintainability>",intLength," ")>");
 	
-	debug("***demo time: <time/1000.0> seconds");
+	println("***demo time: <time/1000.0> seconds");
 	println("***End of demo...");
 }
 

@@ -15,7 +15,6 @@ import lang::java::jdt::m3::Core;
 import lang::java::jdt::m3::AST;
 import lang::java::m3::AST;
 
-import Main;
 import Extractor;
 import metrics::SigModelScale;
 
@@ -28,14 +27,6 @@ import metrics::SigModelScale;
 *	- 			20-60%
 *	-- 			0-20%
 *
-* |java+class:///smallsql/junit/BasicTestCase|
-* rascal>getUnitTestCoverage(smallModel, |java+class:///smallsql/junit/BasicTestCase|);
-* real: 15.6393744300.
-*
-*
-* rascal>getUnitTestCoverageRanking(getUnitTestCoverage(smallModel, |java+class:///smallsql/junit/BasicTestCase|));
-* str: "--"
-
 */
 
 list[loc] extractBaseTestClasses(M3 model) = [from | <from,to> <- model.extends, to == "TestCase"];
@@ -68,17 +59,17 @@ list[loc] extractCalledMethods(M3 model, list[loc] extendedTestClasses) {
 
 
 /* calculate the unit-test-coverage, it is needed for test-quality */
-public real getUnitTestCoverage(M3 model, list[loc] extendedTestClasses) {
-	real methodsTested = 
-	 toReal(size([m | m <- methods(model), m notin extractTestsMethods(model, extendedTestClasses)]));
-	real calledMethods = toReal(size(extractCalledMethods(model, extendedTestClasses)));
-	println("<methodsTested>, <calledMethods>");
+public int getUnitTestCoverage(M3 model, list[loc] extendedTestClasses) {
+	int methodsTested = 
+	 size([m | m <- methods(model), m notin extractTestsMethods(model, extendedTestClasses)]);
+	int calledMethods = size(extractCalledMethods(model, extendedTestClasses));
+	//println("<methodsTested>, <calledMethods>");
 	if (methodsTested !=0) return (calledMethods/methodsTested)*100; else return 0;
 }
 
 
 /* get sig-model ranking for unit-test-coverage */
-public int getUnitTestCoverageRanking(real ratio) {
+public int getUnitTestCoverageRanking(int ratio) {
 	if(ratio >=95) return sigScales[0]; // ++
 	if(ratio >=80)  return sigScales[1]; // +
 	if(ratio >=60)  return sigScales[2]; // o
