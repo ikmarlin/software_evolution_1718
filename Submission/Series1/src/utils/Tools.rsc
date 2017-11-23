@@ -18,32 +18,6 @@ public int countLines(str s){
   return count;
 }
 
-public str eraseOneLineComment(str content) {
-	return visit(content) {
-		case /^[\n\t ]*\/\/.*/ => ""
-	}
-}
-
-public str eraseBlockComment(str content) {
-	return visit(content) {
-		case /\/\*.*?\*\//s => ""
-		case /\/\*[\s\S]*?\*\// => ""
-	}
-}
-
-public str eraseEmptyLines(str content) {
-    return visit(content) {
-        case /^[ \t]*\r?\n/ => "\n"
-    }
-}
-
-public str eraseCurlyBraces(str content) {;
-    return visit(content) {
-        case /[\{\}]/ => " "
-    }
-}
-
-// ighmelene
 list[str] getBlankLines(list[str] lines) {
 	blankLines = [];
 	for(l <- lines)	{
