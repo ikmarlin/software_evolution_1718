@@ -64,14 +64,14 @@ rel[loc,int,int,Block] fileToBlocks(loc file, int blockSize) {
 
 
 
-/* */
+/* get duplicated lines from the blocks */
 rel[loc file,int line] getDuplicateLines(rel[loc,int,int,Block] blocks) {
 	content			= [block | <file,line,blockSize,block> <- blocks];
 	frequency		= distribution(content);
 	return {*[<file,line + i> | i <- [0..blockSize]] | <file, line, blockSize, block> <- blocks, frequency[block] > 1};
 }
 
-/* */
+/* clean and slice file into list of strings*/
 Block getFileSlice(loc f, int i, int length) {
 	ls	= cleanFile(f);
 	return slice(ls,i,length);
