@@ -41,7 +41,7 @@ list[str] cleanFile(loc f) {
 		ls -= getSLComments(ls);
 		ls	= removeAccolades(ls);
 		ls -= getBlankLines(ls);
-		//ls	= removeMultipleWhitespaces(ls);
+		ls	= removeMultipleWhitespaces(ls);
 		cleanFiles[f] = ls;
 	}
 	return cleanFiles[f];
