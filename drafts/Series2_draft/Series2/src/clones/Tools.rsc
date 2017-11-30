@@ -19,14 +19,11 @@ public int getSubtreeSize(node n) {
 }
 
 loc getSubtreeLocation(node n) {
-	if (n) {
-		switch(n) {
+	switch(n) {
             case Declaration d: return d@src;
             case Statement s: return s@src;
             case Expression e: return e@src;
-            case Modifier m: return m@src;
             default : return |project:///|;
-	   }
 	}
 }
 
