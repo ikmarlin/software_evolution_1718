@@ -5,16 +5,12 @@ module clones::Type1
  *
  */
  
-import IO;
-import List;
-import Set;
-import String;
+import Prelude;
 import DateTime;
 import util::Math;
 import lang::java::jdt::m3::AST;
 import lang::java::jdt::m3::Core;
 import Node;
-import Relation;
 import Main;
 import clones::Tools;
 
@@ -22,45 +18,25 @@ alias clone = tuple[loc l, list[str] lines];
 alias clones = lrel[loc l, list[str] lines];
 alias pairs = rel[clone,clone];
 
-public int getSubtreeSize(node n) {
-	count = 0;
-	visit (n) {
-		case node _: count += 1;
-	}
-	return count;
-}
 
-loc getSubtreeLocation(node n) {
-	switch(n) {
-        case Declaration d: return d@src;
-        case Statement s: return s@src;
-        case Expression e: return e@src;
-        default : return |unknown:///|;
-   }
-}
-
-//ighmelene
-set[set[loc]] getCloneClasses(rel[node n, loc l] trees) {
-	return groupRangeByDomain(trees);
-}
-
-
-set[rel[loc,list[str]]] getCloneClasses(pairs c) {
+/* 1- Clones block of 6 lines */
+set[rel[loc,list[str]]] getCloneClassesUsingLinesBlock(pairs c) {
 	list[rel[loc,list[str]]] l = [];
 	for (n <- groupRangeByDomain(c)){
 	  if(size(n) > 1) {l +=n;}
 	}
+	println("size = <size(l)>");
 	return toSet(l);
 }
 
-public pairs getClonePairs(loc project) {
+public pairs getClonePairsUsingLinesBlock(loc project) {
 	cleanVolume = 0;
 	countDuplicates = 0;
 	model = createM3FromEclipseProject(project);
-	clones storage = [];
+	clones store = [];
 	contentIndex = 1;
 	pairs res = {};
-	
+	//println("<files(model)>");
 	for (f <- files(model)) {
 		//moving window in file
 		begin = 0;
@@ -76,6 +52,8 @@ public pairs getClonePairs(loc project) {
 			lines += trim(l);
 		}
 		
+		//println("lines <lines>");
+		
 		// process files longer than 6 lines, exclusive comments, empty lines, leading spaces
 		if (size(ls) >= blockSize) {
 			cleanVolume += size(lines);
@@ -83,13 +61,13 @@ public pairs getClonePairs(loc project) {
 				b = lines[begin..end]; // get block
 				clone c1 = <f , b>;
 				orig = countDuplicates;
-			    for(c2 <- storage){
+			    for(c2 <- store){
 					if(b == c2[contentIndex]) {
 						// clone detected, count block and append pairs to result
 					    countDuplicates += 1;
-						if (countDuplicates ==200) {
-							println("clonepairs = \n 1***) <c1> \n\n 2***)<c2>");
-						}
+						/*if (size(b) >6) {
+							println("XXXXXXXXXXXXXXXXXXclonepairs = \n 1***) <c1> \n\n 2***)<c2>");
+						}*/
 						res += <c1 , c2>; 
 						begin +=1;
 						if(size(lines) <= end+1) {end+=1;} // still some to go
@@ -98,7 +76,7 @@ public pairs getClonePairs(loc project) {
 				}
 				if(orig == countDuplicates) {
 					// block b not found, store it for the first time and move window 1 line 
-					storage += c1;
+					store += c1;
 					begin += 1;
 					end = begin + blockSize;
 				}
@@ -112,28 +90,63 @@ public pairs getClonePairs(loc project) {
 	return res;
 }
 
-// ighmelene
-rel[node n, loc l] getTrees(Declaration ast) {
-	rel[node,loc] statements = {};
-	visit(ast) {
-		case \method(_,_,_,_,Statement body): for(t <- getTrees(body)) statements += <unsetRec(t),t.src>;
-		case \constructor(_,_,_,Statement body): for(t <- getTrees(body)) statements += <unsetRec(t),t.src>;
-	}
-	
-	for (s <- statements) {
-		println("*****<s>");
-		println("*****");
-	}
-	
-	return statements;
+/* end of 1- Clones block of 6 lines */
+
+
+
+/* 2- detecting type1 clone classes */
+void run1(loc project) {
+	println("Type1");
+	storage = ();
+	cloneClasses = ();
+    set[Declaration] asts = createAstsFromEclipseProject(project, true);
+    getCloneClassesType1(asts);
+	println("Storage size = <size(storage)>");
 }
 
-list[Statement] getTrees(Statement s) {
-	stmts = [];
-	visit(s) {
-		case Statement stmt: stmts += stmt;
-	}
-	return stmts;
+void getCloneClassesType1(set[Declaration] ast) {
+    visit (ast) {
+        case node n: storeSubtreeWithLoc(n);
+    }
+    for (key <- storage){
+		// at least duplicated once
+        if (size(storage[key]) >= 2) {
+            cloneClasses[key] = dup(storage[key]);
+			//println("XXX = <key>");
+        }
+    }
+	
+    println(<size(cloneClasses)>);
 }
 
+void storeSubtreeWithLoc(node subtree) {
+    val = getSubtreeLocation(subtree);
 
+	if(val!=|unknown:///|) {
+		int begin = val.begin.line;
+		int end = val.end.line;
+		int length = end - begin;
+		//println("XXX= <length>");
+		
+	  	if (length < 6) {
+	        return;
+	   	}
+	    subtree = unsetRec(subtree);
+	    key = toString(subtree);
+		if (storage[key]?) {
+			storage[key] += val;
+			
+		} else {
+			storage[key] = [val];
+		}
+	}
+	return;
+}
+
+/* end of 2- detecting type1 clone classes */
+
+/* Testing section */
+//property1
+bool property1(clone x, clone y) {
+		return (x.lines == y.lines);
+}

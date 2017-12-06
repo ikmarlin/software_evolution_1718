@@ -8,22 +8,30 @@ import IO;
 import String;
 import List;
 import Node;
+import Prelude;
 import util::Math;
+import lang::java::jdt::m3::Core;
+import lang::java::m3::AST;
+import Main;
+
+
+alias block = tuple[loc,list[Statement]];
 
 public int getSubtreeSize(node n) {
 	count = 0;
 	visit (n) {
-		case node n: count += 1;
+		case node _: count += 1;
 	}
 	return count;
 }
 
+
 loc getSubtreeLocation(node n) {
 	switch(n) {
-            case Declaration d: return d@src;
-            case Statement s: return s@src;
-            case Expression e: return e@src;
-            default : return |project:///|;
+            case Declaration d: return d.src;
+            case Statement s: return s.src;
+            case Expression e: return e.src;
+            default : return |unknown:///|;
 	}
 }
 
@@ -133,3 +141,5 @@ int average(list[int] vals) {
 	real total	= toReal(sum(vals));
 	return round(total/amount);
 }
+
+
