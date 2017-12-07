@@ -13,8 +13,9 @@ import duplication;
 
 public map[loc,list[str]] cleanFiles = ();
 alias Block = list[str];
+alias Clone = tuple[Block block,loc file,int line,int size,int freq];
  
-list[str] cleanFile(loc f)
+list[str] cleanFile1(loc f)
 {
 	if(f notin cleanFiles)
 	{
@@ -53,27 +54,37 @@ list[str] getImports(list[str] lines)
 	return matches;
 }
 
-rel[Block b, loc f, int l, int s, int d] getCloneClasses(M3 m, int blockSize)
+list[str] projectToList1(M3 m)
 {
-	project		= projectToList(m);
+	project = [];
+	for(file <- sort(files(m)))
+	{
+		project	+= cleanFile1(file);
+	}
+	return project;
+}
+
+set[Clone] getCloneClasses(M3 m, int blockSize)
+{
+	project		= projectToList1(m);
 	projVol		= size(project);
 	projStr		= intercalate("\n",project);
 	blocks		= [];
 	dupVol		= 0;
 	firstClass	= true;
-	cloneClasses	= {};
 	ls 			= {};
 	
-	tuple[Block block, loc file, int line, int size, int frequency] lastClass;
+	set[Clone] cloneClasses	= {};
+	Clone lastClass;
 	
 	for(file <- sort(files(m)))
 	//for(file <- files(m))
 	{
-		lines 	= cleanFile(file);	
-		println();
-		println("cleaned file: <file>\n");
-		for(l <- [0..size(lines)]) println("  <right("<l>",2," ")> <lines[l]>");
-		println("\nclone classes:\n");
+		lines 	= cleanFile1(file);	
+		//println();
+		//println("cleaned file: <file>\n");
+		//for(l <- [0..size(lines)]) println("  <right("<l>",2," ")> <lines[l]>");
+		//println("\nclone classes:\n");
 		fileSize	= size(lines);
 		maxStart	= fileSize - blockSize;
 		lastSize	= 0;
@@ -108,7 +119,7 @@ rel[Block b, loc f, int l, int s, int d] getCloneClasses(M3 m, int blockSize)
 				
 				if(lastFreq > 1)
 				{
-					tuple[Block block, loc file, int line, int size, int frequency] currClass	= <lastBlock,file,i,lastSize,lastFreq>;
+					Clone currClass	= <lastBlock,file,i,lastSize,lastFreq>;
 					addClass		= false;
 					
 					if(firstClass)
@@ -124,54 +135,50 @@ rel[Block b, loc f, int l, int s, int d] getCloneClasses(M3 m, int blockSize)
 					}
 					else
 					{
-						lastLines = [lastClass.line..lastClass.line + lastClass.size];
-						currLines = [i..i + lastSize];
-						
-						// (not) subsumed
-						if(!(currLines <= lastLines))
-						{
-							addClass = true;
-						}
-						else
-						{
-							if(lastClass.frequency < lastFreq) addClass = true;
-						}
+						if(!subsumes(lastClass,currClass)) addClass = true;
 					}
 					
 					if(addClass)
 					{
-						println("  lines: <i>..<i+lastSize - 1>, duplicates: <lastFreq>");
+						//println("  lines: <i>..<i+lastSize - 1>, duplicates: <lastFreq>");
 						cloneClasses	+= currClass;
 						lastClass	 = currClass;
+						ls += getCloneLines(currClass);
 					}
 				}
 			}
 		}
 	}
 	
-	println("\n----------------------------------------\n");
-	for(<b,f,l,s,d> <- cloneClasses)
-	{
-		ls += {<f,i> | i <- [l..l+s]};
-	}
 	dupVol	= size(ls);
 	perc		= percent(dupVol,projVol);
+	
+	//println();
 	println("<left("duplicate volume:",20," ")> <right("<dupVol>",6," ")>");
 	println("<left("total volume:",20," ")> <right("<projVol>",6," ")>");
 	println("<left("duplication:",20," ")> <right("<perc>",5," ")>%");
-	println("\n----------------------------------------\n");
-	
-	for(b <- dup(sort(domain(cloneClasses))))
-	{
-		println(b);
-		println();
-		for(<f,l,s,d> <- sort(cloneClasses[b]))
-		{
-			println("  \<<f.file>,<l>,<s>,<d>\>");
-		}
-		println();
-	}
-	println("\n----------------------------------------\n");
+	println();
 	
 	return cloneClasses;
+}
+
+rel[loc,int] getCloneLines(Clone clone) = {<clone.file,l> | l <- [clone.line..clone.line + clone.size]};
+
+bool subsumes(Clone a, Clone b)
+{
+	subsumed		= true;
+	lastLines	= getCloneLines(a);
+	currLines	= getCloneLines(b);
+	
+	// (not) subsumed
+	if(!(currLines <= lastLines))
+	{
+		subsumed = false;
+	}
+	else
+	{
+		if(a.freq < b.freq) subsumed = false;
+	}
+	
+	return subsumed;
 }
