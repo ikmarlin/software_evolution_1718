@@ -28,7 +28,7 @@ public int blockSize = 3;
 
 public map[str, lrel[loc, int, bool]] storage = ();
 public map[str, lrel[loc, int, bool]] cloneClasses = ();
-public int minLoc = 6;
+public int minLoc = 2; // min loc for statement to be considered as clone, change from 1 to 6 or suitable val
 
 str getTimedFilename(str basename) = basename + getTimeForFile();
 str getTimeForFile() = printDateTime(now(), "YYYYMMddHHmmssSSS");
@@ -51,7 +51,8 @@ void main(loc project) {
 	}
 	
 	// testing
-	println(<hasSameSize(storage)>);
+	//println(<hasSameSize(storage)>);
+	//println(<correctClasses(storage)>);
 	
 	//type2
 	run2(project);
@@ -62,9 +63,6 @@ void main(loc project) {
 		appendToFile((|project://Series2/output/|)+ type2, storage[c]);
 		appendToFile((|project://Series2/output/|)+ type2,"\n\n\n");
 	}
-	
-	// testing
-	//hasSameSize(storage);
 }
 
 /*

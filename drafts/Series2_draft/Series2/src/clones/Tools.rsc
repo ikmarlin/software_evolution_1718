@@ -59,9 +59,9 @@ bool isSubsumed(lrel[loc,int,bool] c1, lrel[loc,int,bool] c2) {
 	// scan all and compare positions for excluding strictly included classes
 	for(c22 <- c2){
 		for(c11 <- c1){
-			println("subclass position: (<c22[0].begin.line>, <c22[0].end.line>)");
-			println("mainclass position: (<c11[0].begin.line>, <c11[0].end.line>)");
-			println("------------------------");
+			//println("subclass position: (<c22[0].begin.line>, <c22[0].end.line>)");
+			//println("mainclass position: (<c11[0].begin.line>, <c11[0].end.line>)");
+			//println("------------------------");
 			if(!(c22[0].begin > c11[0].begin && c22[0].end < c11[0].end)) {
 				subsumed = false;
 			} else {

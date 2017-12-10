@@ -1,7 +1,36 @@
 module tests::TestType1
-
+/**
+ *
+ * @author ighmelene.marlin, rasha.daoud
+ *
+ */
 import Prelude;
+import Main;
+import clones::Type1;
 
+loc proj = |project://smallsql0.21_src_test|;
+
+/* results 
+	rascal>runTest();
+	Type1
+	clone classes before taking out strictly included clone classes = 9
+	clone classes after taking out strictly included clone classes = 9
+	Storage size = 9
+	<true>
+	<true>
+	ok
+*/
+void runTest() {
+	storage = ();
+	cloneClasses = ();
+	run1(proj);
+	// testing
+	println(<hasSameSize(storage)>);
+	println(<correctClasses(storage)>);
+}
+
+
+/* properties */
 bool hasSameSize(map[str, lrel[loc, int, bool]] storage) {
 	bool isSameSize = true;
 	for (key <- storage) {
@@ -21,4 +50,17 @@ bool hasSameSize(map[str, lrel[loc, int, bool]] storage) {
 	return isSameSize;
 }
 
-
+bool correctClasses(map[str, lrel[loc, int, bool]] storage) {
+	bool isCorrectClasses = true;
+	for (key1 <- storage) {
+		for (key2 <- storage) {
+			if (key1!=key2) {
+				isCorrectClasses = (storage[key1] != storage[key2]);
+			}		
+		}
+		if (!isCorrectClasses) {
+			break;
+		}
+	}
+	return isCorrectClasses;
+}

@@ -219,19 +219,6 @@ void storeSubtreeWithLoc(node subtree) {
 			storage[key] = [<val,length,false>];
 		}
 	}
-	/* obsolete code
-	key = toString(subtree);
-	for (c1 <- storage[key]) {
-		for (c2 <- storage[key]){
-			if (c1 !=c2) {
-				tuple[loc l, loc r] ss;
-				ss.l = c1[0];
-				ss.r = c2[0];
-				clonePairs[key] = ss;
-				println("hello");
-			}
-		}
-	}*/
 }
 
 
