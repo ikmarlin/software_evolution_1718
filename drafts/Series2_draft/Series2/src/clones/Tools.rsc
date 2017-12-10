@@ -13,11 +13,12 @@ import util::Math;
 import lang::java::jdt::m3::Core;
 import lang::java::m3::AST;
 import Main;
+import clones::Type1;
+import clones::Type2;
 
+/* Begin of AST help functions */
 
-alias block = tuple[loc,list[Statement]];
-
-public int getSubtreeSize(node n) {
+int getSubtreeSize(node n) {
 	count = 0;
 	visit (n) {
 		case node _: count += 1;
@@ -34,6 +35,47 @@ loc getSubtreeLocation(node n) {
             default : return |unknown:///|;
 	}
 }
+
+
+bool isTextContained(str text1, str text2){
+	bool contained = false;
+	if(text1 == text2){
+		return contained;
+	}
+	int count = 0;
+	while((count + size(text2)) <= size(text1)){
+		if(text2 == text1[count..(count + size(text2))]){
+			contained = true;
+		}
+		count += 1;
+	}
+	return contained;
+}
+
+bool isSubsumed(lrel[loc,int,bool] c1, lrel[loc,int,bool] c2) {
+	bool subsumed = true;
+	//tuple[loc,int,bool] x;
+	//tuple[loc,int,bool] y;
+	// scan all and compare positions for excluding strictly included classes
+	for(c22 <- c2){
+		for(c11 <- c1){
+			println("subclass position: (<c22[0].begin.line>, <c22[0].end.line>)");
+			println("mainclass position: (<c11[0].begin.line>, <c11[0].end.line>)");
+			println("------------------------");
+			if(!(c22[0].begin > c11[0].begin && c22[0].end < c11[0].end)) {
+				subsumed = false;
+			} else {
+				continue; // do next comparison, until exiting loops with false, it means the class is strictly included given all pairs
+			}
+		}
+	}
+	return subsumed;
+}
+
+/* End of AST help functions */
+
+
+/* Begin of Textual scan help functions */
 
 list[str] getBlankLines(list[str] lines) {
 	blankLines = [];
@@ -135,11 +177,21 @@ list[str] removeMultipleWhitespaces(list[str] lines) {
 	return clean;
 }
 
-/* get average of a list of integers, round result to int */
-int average(list[int] vals) {
-	int amount	= size(vals);
-	real total	= toReal(sum(vals));
-	return round(total/amount);
+list[str] getPackages(list[str] lines) {
+	matches = [];
+	for(line <- lines) {
+		if(startsWith(trim(line),"package")) matches += line;
+	}
+	return matches;
 }
 
+list[str] getImports(list[str] lines) {
+	matches = [];
+	for(line <- lines) {
+		if(startsWith(trim(line),"import")) matches += line;
+	}
+	return matches;
+}
+
+/* End of Textual scan help functions */
 

@@ -22,6 +22,27 @@ void run2(loc project) {
 	println("Storage size = <size(storage)>");
 }
 
+void getCloneClassesType2(set[Declaration] asts) {
+	// get initial classes
+	getInitialCloneClassesType2(asts);
+	// get rid of strictly included classes
+	postProcessCloneClasses();
+}
+
+void getInitialCloneClassesType2(set[Declaration] asts) {
+    visit (asts) {
+        case node n: storeSubtreeWithLoc(convert(n)); //convert each subtree first
+    }
+    for (key <- storage) {
+		// at least duplicated once
+        if (size(storage[key]) >= 2) {
+            cloneClasses[key] = dup(storage[key]);
+        }
+    }
+   	println("clone classes before taking out strictly included clone classes = <size(cloneClasses)>");
+}
+
+
 // skip leaves details
 node convert(node subtree) {
 	return visit(subtree) {
@@ -43,18 +64,4 @@ node convert(node subtree) {
    		case Modifier _ => \private()
    		case Type _ => wildcard()
 	}
-}
-
-
-void getCloneClassesType2(set[Declaration] ast) {
-    visit (ast) {
-        case node n: storeSubtreeWithLoc(convert(n));
-    }
-    for (key <- storage) {
-		// at least duplicated once
-        if (size(storage[key]) >= 2) {
-            cloneClasses[key] = dup(storage[key]);
-        }
-    }
-    println(<size(cloneClasses)>);
 }

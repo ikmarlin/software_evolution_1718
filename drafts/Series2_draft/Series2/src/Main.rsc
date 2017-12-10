@@ -4,7 +4,6 @@ module Main
  * @author ighmelene.marlin, rasha.daoud
  *
  */
- 
 import IO;
 import String;
 import Map;
@@ -23,11 +22,12 @@ import clones::Tools;
 alias tree = set[Declaration];
 alias pairs = rel[clone,clone];
 public pairs clonePairs = {};
-public int blockSize = 6;
+public int blockSize = 3;
 
 
-public map[str, list[loc]] storage = ();
-public map[str, list[loc]] cloneClasses = ();
+public map[str, lrel[loc, int, bool]] storage = ();
+public map[str, lrel[loc, int, bool]] cloneClasses = ();
+public int minLoc = 6;
 
 str getTimedFilename(str basename) = basename + getTimeForFile();
 str getTimeForFile() = printDateTime(now(), "YYYYMMddHHmmssSSS");
@@ -36,44 +36,30 @@ str getTimeForFile() = printDateTime(now(), "YYYYMMddHHmmssSSS");
 public loc smallsql = |project://smallsql0.21_src/|;
 public loc hsqldb   = |project://hsqldb-2.3.1/|;
 
-/* result smallsql:
-	lines-blocks
-	Count duplicated blocks = 445
-	Count duplicated lines = 2670
-	Duplication percentage = 11%
+
+
+void main(loc project) {
+	run1(project);
+	str type1 = getTimedFilename("Output_type1_");
+	writeFile((|project://Series2/output/|)+ type1,"Output from analyzing clone classes of type1:\n");
+	for (c <- cloneClasses ){
+		appendToFile((|project://Series2/output/|)+ type1,  c+"\n");
+	}
 	
-	run1
-	24 classes
-*/
+	run2(project);
+	str type2 = getTimedFilename("Output_type1_");
+	writeFile((|project://Series2/output/|)+ type2,"Output from analyzing clone classes of type2:\n");
+	for (c <- cloneClasses ){
+		appendToFile((|project://Series2/output/|)+ type2, c+"\n");
+	}
+}
+
+/*
+//for testing, TODO remove it
 void extractClonesType1(loc project) {
 	pairs ps = getClonePairsUsingLinesBlock(project);
 	getCloneClassesUsingLinesBlock(ps);
 	appendToFile(|project://Series2/output/output|,ps);
 	run1(project);
-}
-
-void main_() {
-	//|project://Series2/output| + ("file_" + printDateTime(now(), "yyyyMMdd;hh.mm.ss")+ ".txt");
-	//printDateTime(now(), "yyyyMMdd;hh.mm.ss");
-	loc l = |project://Series2/testExamples/smallsql/database/Column.java|;
-	set[Declaration] ast = createAstsFromEclipseProject(smallsql, true);
-	//ast = createAstFromFile(l, true);
-	//println("<ast>");
-	children = [];
-	for (Declaration a <- ast) {
-		b = unsetRec(a);
-		//println(<getTrees(b)>);
-		visit(b) {
-			case node n: {
-				//println("node = <n> size = <getSubtreeSize(n)>");
-				children += getChildren(n);
-			}
-		}
-	}
-	
-	dist = distribution(children);
-	
-	//for (d <-dist) {
-		//println ("\n ***** <d> **** \n");
-//	}
-}
+	run2(project);
+}*/
