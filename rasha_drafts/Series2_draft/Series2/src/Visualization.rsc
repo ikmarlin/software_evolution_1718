@@ -16,13 +16,14 @@ import util::Editors;
 import demo::common::Crawl;
 import Main;
 import clones::Type1;
+import clones::Type2;
 import clones::Tools;
 
 loc selectedProj = toLocation("");
 map[loc, int] filesMap = ();
 bool rerun1 = false;
-
 lrel[loc, int, bool] biggestClone;
+str biggestCloneKey;
 
 /* calculate volume based on files in java project */
 int countLoc(loc f) {
@@ -50,6 +51,7 @@ int getBiggerClone() {
 			if (max < c[1]) {
 				max = c[1];
 				biggestClone = cloneClasses[key];
+				biggestCloneKey = key;
 			}
 		}
 	}
@@ -57,43 +59,47 @@ int getBiggerClone() {
 }
 
 /* Main visualizer */
-public void visualize2(loc project) {
-	run1(project); // default
-    set[Declaration] asts = createAstsFromEclipseProject(project, true);
-	M3 model = createM3FromEclipseProject(project);
-	int vol = getVolume(model);
-	int max = getBiggerClone();
-	fillFiles(asts);
-	
+public void visualize() {
+	//run1(project);
 	menuBox = box(getMenuFigure());
 	welcome = box(text("Welcome to series2 - Clone detection",  fontBold(true), fontSize(10)), fillColor("green"));
 	//guide   = box(text("Run on one of the projects"));
-	wohoo = box(
-				vcat([
-					box(text("Clone detection - clones per java file", fontSize(10)), fontBold(true), fillColor("white")),
-					box(text("Volume after global clean up: <vol> \t\t\t\tDuplication percentage: <vol>\t\t\t\t Clone classes: <size(cloneClasses)>",fontBold(true),left()),vshrink(0.05)),
-					box(text("Largest detected clone & size: <biggestClone> \t\t\t<max>",fontBold(true),left()),vshrink(0.05)),
-					//computeFigure(reruntype1, headerFigure, [grow(1)]),
-					computeFigure(reruntype1, getFigure, [grow(1)])
-				])
-			);
 	Figure topScreen = box(hcat([welcome/*, guide*/]), height(20), resizable(true, false));	
 	
-	if(selectedProj != toLocation("")) {
-		render("Welcome to series2 - Clone detection", vcat([topScreen, menuBox, wohoo]));
+	if (selectedProj != toLocation("")){
+		set[Declaration] asts = createAstsFromEclipseProject(selectedProj, true);
+		M3 model = createM3FromEclipseProject(selectedProj);
+		int vol = getVolume(model);
+		int max = getBiggerClone();
+		fillFiles(asts);
+		
+		//largestCloneBox = getCloneClassBox(biggestCloneKey);
+		// render clones per file
+		fileClones = box(
+				vcat([
+					box(text("Clone detection - clones per java file", fontSize(20)), fontBold(true), fillColor("white")),
+					box(text("Volume after global clean up: <vol> \t\t\t\tDuplication percentage: <vol>\t\t\t\t Clone classes: <size(cloneClasses)>",fontBold(true),left()),vshrink(0.05)),
+					//box(text("Largest detected clone & size: <biggestClone> \t\t\t<max>",fontBold(true),left()),vshrink(0.05)),
+					//largestCloneBox,
+					computeFigure(reruntype1, getFigure, [grow(0.5)])
+				])
+			);
+		render("Welcome to series2 - Clone detection", vcat([topScreen, menuBox, fileClones]));
+		
+		// render clone classes
+		panel = box(text("Clone classes view", fontSize(20)), height(30), fillColor("azure"));
+		render("Clone classes view", vcat([panel,hcat(getFigures())]));
+		//render("Clone classes view", hcat(getFigures()));
 	} else {
 		render("Welcome to series2 - Clone detection", vcat([topScreen, menuBox]));
 	}
 	
-	panel = box(text("Clone classes view", fontSize(50)), height(30), fillColor("azure"));
-	render("Clone classes view", vcat([panel,hcat(getFigures())]));
 	
 	/*render(box(
 				vcat([
 					box(text("Clone detection - clones per java file", fontSize(10)), fontBold(true), fillColor("white")),
 					box(text("Volume after global clean up: <vol> \t\t\t\tDuplication percentage: <vol>\t\t\t\t Clone classes: <size(cloneClasses)>",fontBold(true),left()),vshrink(0.05)),
 					box(text("Largest detected clone & size: <biggestClone> \t\t\t<max>",fontBold(true),left()),vshrink(0.05)),
-					//computeFigure(reruntype1, headerFigure, [grow(1)]),
 					computeFigure(reruntype1, getFigure, [grow(1)])
 				])
 			)
@@ -114,30 +120,37 @@ Figure getFigure() {
 	properties = [];
 	M3 model = createM3FromEclipseProject(selectedProj);
 	str lines;
-	str linesIndex;
+	//str linesIndex;
+	map[loc,str] cloneLinesPerFile = ();
 	//str fileName = "";
 	for (file <- filesMap) {
 		markers = [];
 		for (key <- cloneClasses ) {
 			lines = "";
-			linesIndex = "";
+			//linesIndex = "";
 			//fileName = "";
 			for (c <- cloneClasses[key] ) {
 				if (file == |<c[0].scheme>://<c[0].authority><c[0].path>|) {
 					b = c[0].begin.line;
 					e = c[0].end.line;
 					lines = getLines(c[0]);
-					linesIndex += "\t<b>..<e>\n";
+					//linesIndex += " <b>..<e>\t";
+					if(cloneLinesPerFile[file]?) {
+						if (!contains(cloneLinesPerFile[file], "<b>..<e>"))
+							cloneLinesPerFile[file] += " <b>..<e>,";
+					} else {
+						cloneLinesPerFile[file] = " <b>..<e>,";
+					}
+					
 					//fileName = c[0].file;
 					for (l <- [b+1..e-1] ) {
-						markers += info(l,key);
+						markers += info(l,"<b>..<e>\t");
 					}
 				};
 			}
 		}
 		if (size(markers)>0) {
-			//properties += text(fileName);
-			properties += outline(markers, filesMap[file], size(70,200), message("<file.file>", linesIndex)/*, message("<lines>","")*/);
+			properties += outline(markers, filesMap[file], size(90,180), message("<file.file>", cloneLinesPerFile[file])/*, message("<lines>","")*/);
 		}
 	}
 	return box(	hcat(properties), fillColor("white"));
@@ -151,27 +164,6 @@ str getLines(loc f) {
 	}
 	return ll;
 }
-
-
-Figure headerFigure() {
-	M3 model = createM3FromEclipseProject(selectedProj);
-	properties = [];
-	str fileName;
-	for (file <- filesMap) {
-		fileName = "";
-		markers = [];
-		for (key <- cloneClasses ) {
-			for (c <- cloneClasses[key] ) {
-				if (file == |<c[0].scheme>://<c[0].authority><c[0].path>|) {
-					fileName = file.file;
-				};
-			}
-		}
-		properties += text(fileName);
-	}
-	return box(hcat(properties), fontSize(3), fillColor("white"));
-}
-
 
 
 
@@ -201,11 +193,17 @@ void fillFiles(set[Declaration] asts) {
 
 Figure getMenuFigure() {
 	return vcat([
-				combo(["sample1","sample2","small","hs"], void(str s){ getSelectedProject(s);}, hsize(200), resizable(false, false)),
-				button("Visualize classes", void() {
+				combo(["sample1","sample2","small","hs"], void(str s){getSelectedProject(s);}, center(), hsize(200), resizable(false, false)),
+				button("Visualize type1", void() {
 				run1(selectedProj);
-				visualize2(selectedProj);
-				}, hsize(100), hgap(25), resizable(false, false))
+				visualize();
+				},
+				hsize(100), hgap(25), resizable(false, false)),
+				button("Visualize type2", void() {
+				run2(selectedProj);
+				visualize();
+				}, 
+				hsize(100), hgap(25), resizable(false, false))
 				], resizable(false, false));
 }
 
