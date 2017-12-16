@@ -23,12 +23,12 @@ import tests::TestType1;
 alias tree = set[Declaration];
 alias pairs = rel[clone,clone];
 public pairs clonePairs = {};
-public int blockSize = 3;
+public int blockSize = 6;
 
 
 public map[str, lrel[loc, int, bool]] storage = ();
 public map[str, lrel[loc, int, bool]] cloneClasses = ();
-public int minLoc = 2; // min loc for statement to be considered as clone, change from 1 to 6 or suitable val
+public int minLoc = 6; // min loc for statement to be considered as clone, change from 1 to 6 or suitable val
 
 str getTimedFilename(str basename) = basename + getTimeForFile();
 str getTimeForFile() = printDateTime(now(), "YYYYMMddHHmmssSSS");
@@ -43,10 +43,16 @@ void main(loc project) {
 	//type1
 	run1(project);
 	str type1 = getTimedFilename("Output_type1_");
-	writeFile((|project://Series2/output/|)+ type1,"Output from analyzing clone classes of type1:\n");
+	writeFile((|project://Series2/output/|)+ type1,"Output from analyzing clone classes of type1:\n\n");
+	countClass = 0;
 	for (c <- storage ){
-		appendToFile((|project://Series2/output/|)+ type1,  c+"\n");
-		appendToFile((|project://Series2/output/|)+ type1, storage[c]);
+		countClass += 1;
+		appendToFile((|project://Series2/output/|)+ type1, countClass);
+		appendToFile((|project://Series2/output/|)+ type1, ")\n" + c + "\n");
+		for (cc <- storage[c]) {
+			appendToFile((|project://Series2/output/|)+ type1, cc[0]);
+			appendToFile((|project://Series2/output/|)+ type1, "\n");
+		}
 		appendToFile((|project://Series2/output/|)+ type1,"\n\n\n");
 	}
 	
@@ -58,9 +64,15 @@ void main(loc project) {
 	run2(project);
 	str type2 = getTimedFilename("Output_type2_");
 	writeFile((|project://Series2/output/|)+ type2,"Output from analyzing clone classes of type2:\n");
+	countClass = 0;
 	for (c <- storage ){
-		appendToFile((|project://Series2/output/|)+ type2, c+"\n");
-		appendToFile((|project://Series2/output/|)+ type2, storage[c]);
+		countClass += 1;
+		appendToFile((|project://Series2/output/|)+ type2, countClass);
+		appendToFile((|project://Series2/output/|)+ type2, ")\n" + c + "\n");
+		for (cc <- storage[c]) {
+			appendToFile((|project://Series2/output/|)+ type2, cc[0]);
+			appendToFile((|project://Series2/output/|)+ type2, "\n");
+		}
 		appendToFile((|project://Series2/output/|)+ type2,"\n\n\n");
 	}
 }
