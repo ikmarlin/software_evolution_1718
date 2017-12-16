@@ -14,6 +14,7 @@ import DateTime;
 import ParseTree;
 import lang::java::jdt::m3::Core;
 import lang::java::jdt::m3::AST;
+import Visualization;
 import clones::Type1;
 import clones::Type2;
 import clones::Tools;

@@ -1,4 +1,4 @@
-module Vis4
+module Visualization
 /**
  *
  * @author ighmelene.marlin, rasha.daoud
@@ -68,13 +68,27 @@ public void visualize2(loc project) {
 	menuBox = box(getMenuFigure());
 	welcome = box(text("Welcome to series2 - Clone detection",  fontBold(true), fontSize(10)), fillColor("green"));
 	//guide   = box(text("Run on one of the projects"));
+	wohoo = box(
+				vcat([
+					box(text("Clone detection - clones per java file", fontSize(10)), fontBold(true), fillColor("white")),
+					box(text("Volume after global clean up: <vol> \t\t\t\tDuplication percentage: <vol>\t\t\t\t Clone classes: <size(cloneClasses)>",fontBold(true),left()),vshrink(0.05)),
+					box(text("Largest detected clone & size: <biggestClone> \t\t\t<max>",fontBold(true),left()),vshrink(0.05)),
+					//computeFigure(reruntype1, headerFigure, [grow(1)]),
+					computeFigure(reruntype1, getFigure, [grow(1)])
+				])
+			);
+	Figure topScreen = box(hcat([welcome/*, guide*/]), height(20), resizable(true, false));	
 	
-	Figure topScreen = box(hcat([(welcome), guide]), height(60), resizable(true, false));	
-	render("Clone detection - clone classes view - Click on name to browse to the cloned code", (vcat([topScreen, menuBox])));
+	if(selectedProj != toLocation("")) {
+		render("Welcome to series2 - Clone detection", vcat([topScreen, menuBox, wohoo]));
+	} else {
+		render("Welcome to series2 - Clone detection", vcat([topScreen, menuBox]));
+	}
 	
+	panel = box(text("Clone classes view", fontSize(50)), height(30), fillColor("azure"));
+	render("Clone classes view", vcat([panel,hcat(getFigures())]));
 	
-	render("Series2 - Clone detection", (hcat(getFigures())));
-	render(box(
+	/*render(box(
 				vcat([
 					box(text("Clone detection - clones per java file", fontSize(10)), fontBold(true), fillColor("white")),
 					box(text("Volume after global clean up: <vol> \t\t\t\tDuplication percentage: <vol>\t\t\t\t Clone classes: <size(cloneClasses)>",fontBold(true),left()),vshrink(0.05)),
@@ -83,7 +97,7 @@ public void visualize2(loc project) {
 					computeFigure(reruntype1, getFigure, [grow(1)])
 				])
 			)
-	);
+	);*/
 }
 
 
@@ -100,28 +114,30 @@ Figure getFigure() {
 	properties = [];
 	M3 model = createM3FromEclipseProject(selectedProj);
 	str lines;
+	str linesIndex;
 	//str fileName = "";
 	for (file <- filesMap) {
 		markers = [];
 		for (key <- cloneClasses ) {
 			lines = "";
+			linesIndex = "";
 			//fileName = "";
 			for (c <- cloneClasses[key] ) {
 				if (file == |<c[0].scheme>://<c[0].authority><c[0].path>|) {
 					b = c[0].begin.line;
 					e = c[0].end.line;
-					//println(<c[0].begin.text>);
+					lines = getLines(c[0]);
+					linesIndex += "\t<b>..<e>\n";
+					//fileName = c[0].file;
 					for (l <- [b+1..e-1] ) {
 						markers += info(l,key);
-						lines = getLines(c[0]);
-						//fileName = c[0].file;
 					}
 				};
 			}
 		}
 		if (size(markers)>0) {
 			//properties += text(fileName);
-			properties += outline(markers, filesMap[file], size(70,200), message("<file.file>"), message("<lines>"));
+			properties += outline(markers, filesMap[file], size(70,200), message("<file.file>", linesIndex)/*, message("<lines>","")*/);
 		}
 	}
 	return box(	hcat(properties), fillColor("white"));
@@ -159,9 +175,9 @@ Figure headerFigure() {
 
 
 
-FProperty message(str s){
+FProperty message(str s, str ins){
 	return { 
-		onMouseOver(box(text(s), fillColor("white"), grow(0.2), resizable(false)));
+		onMouseOver(box(text(s+ins), fillColor("white"), grow(0.2), resizable(false)));
   	}
 }
 
