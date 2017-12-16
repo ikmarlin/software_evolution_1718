@@ -62,23 +62,21 @@ public void visualize2(loc project) {
     set[Declaration] asts = createAstsFromEclipseProject(project, true);
 	M3 model = createM3FromEclipseProject(project);
 	int vol = getVolume(model);
-	int max =  getBiggerClone();
+	int max = getBiggerClone();
 	fillFiles(asts);
-	//selectMenu =  box(dropdownmenu(), width(60), fillColor("white), resizable(true,true));
 	
 	menuBox = box(getMenuFigure());
 	welcome = box(text("Welcome to series2 - Clone detection",  fontBold(true), fontSize(10)), fillColor("green"));
-	guide = box(text("Run on one of the projects"));
-	//compute = computeFigure(reruntype1, getFigure, [grow(1)]);
+	//guide   = box(text("Run on one of the projects"));
 	
 	Figure topScreen = box(hcat([(welcome), guide]), height(60), resizable(true, false));	
-	render("Welcome to series2 - Clone detection", (vcat([topScreen, menuBox/*,compute*/])));
+	render("Clone detection - clone classes view - Click on name to browse to the cloned code", (vcat([topScreen, menuBox])));
 	
 	
-	render("Welcome to series2 - Clone detection", (hcat(getFigures())));
+	render("Series2 - Clone detection", (hcat(getFigures())));
 	render(box(
 				vcat([
-					box(text("Welcome to series2 - Clone detection", fontSize(10)), fontBold(true), fillColor("white")),
+					box(text("Clone detection - clones per java file", fontSize(10)), fontBold(true), fillColor("white")),
 					box(text("Volume after global clean up: <vol> \t\t\t\tDuplication percentage: <vol>\t\t\t\t Clone classes: <size(cloneClasses)>",fontBold(true),left()),vshrink(0.05)),
 					box(text("Largest detected clone & size: <biggestClone> \t\t\t<max>",fontBold(true),left()),vshrink(0.05)),
 					//computeFigure(reruntype1, headerFigure, [grow(1)]),
@@ -183,7 +181,7 @@ void fillFiles(set[Declaration] asts) {
 			}
 	}
 }
-	
+
 
 Figure getMenuFigure() {
 	return vcat([
@@ -210,23 +208,11 @@ void getSelectedProject(str s) {
 
 list[Figure] getFigures() {
 	figureList = [];
-	str lines;
+	
 	for (file <- filesMap) {
 		markers = [];
-		for (key <- cloneClasses ) {
-			lines = "";
-			for (c <- cloneClasses[key] ) {
-				if (file == |<c[0].scheme>://<c[0].authority><c[0].path>|) {
-					b = c[0].begin.line;
-					e = c[0].end.line;
-					for (l <- [b+1..e-1] ) {
-						markers += info(l,key);
-						lines = getLines(c[0]);
-						
-					}
-				};
-				figureList += getCloneBox(c[0]);
-			}
+		for (key <- cloneClasses) {
+			figureList += getCloneClassBox(key);
 		}
 	}
 	return figureList;
@@ -236,12 +222,23 @@ Figure getCloneBox(loc f){
 	fileName = f.file;
 	cloneBox = box(
 					text("<fileName>", fontSize(10)),
-					resizable(true, false),	
-					//hint("<f.file>"),
+					resizable(true, false),
+					hint("<f.begin.line> .. <f.end.line>"),
+					fillColor("azure"),
 					onMouseDown(bool (int butnr, map[KeyModifier,bool] modifiers)	{
 						edit(f);
 						return true;
 					}
 				));
 	return cloneBox;
+}
+
+Figure getCloneClassBox(str key) {
+	list[Figure] boxes = [];
+	for (c <- cloneClasses[key]) {
+		fileName = |<c[0].scheme>://<c[0].authority><c[0].path>|.file;
+		cloneBox = getCloneBox(c[0]);
+		boxes += cloneBox;
+	}
+	return box(vcat(boxes));
 }
