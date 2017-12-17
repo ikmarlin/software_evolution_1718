@@ -26,7 +26,6 @@ bool rerun1 = false;
 lrel[loc, int] biggestClone;
 str biggestCloneClassKey;
 str biggestCloneKey;
-int clonesVolume;
 
 
 /* Main visualizer */
@@ -41,6 +40,7 @@ public void visualize(bool run) {
 		set[Declaration] asts = createAstsFromEclipseProject(selectedProj, true);
 		M3 model = createM3FromEclipseProject(selectedProj);
 		int vol = getVolume(model);
+		int clonesVolume = getVolumeClones();
 		int biggestCloneSize = getBiggerClone();
 		int biggestCloneClassSize = getBiggestCloneClass();
 		fillFiles(asts);
@@ -156,7 +156,6 @@ Figure getFigure() {
 	properties = [];
 	M3 model = createM3FromEclipseProject(selectedProj);
 	str lines;
-	clonesVolume = 0;
 	//str linesIndex;
 	map[loc,str] cloneLinesPerFile = ();
 	//str fileName = "";
@@ -170,7 +169,6 @@ Figure getFigure() {
 				if (file == |<c[0].scheme>://<c[0].authority><c[0].path>|) {
 					b = c[0].begin.line;
 					e = c[0].end.line;
-					clonesVolume += (e-b);
 					lines = getLines(c[0]);
 					//linesIndex += " <b>..<e>\t";
 					if(cloneLinesPerFile[file]?) {
@@ -184,14 +182,13 @@ Figure getFigure() {
 					for (l <- [b+1..e-1] ) {
 						markers += info(l,"<b>..<e>\t");
 					}
-				};
+				}
 			}
 		}
 		if (size(markers)>0) {
 			properties += outline(markers, filesMap[file], size(20,180), message("<file.file>", cloneLinesPerFile[file]));
 		}
 	}
-	println("Clones volume = <clonesVolume>");
 	return box(hcat(properties), fillColor("azure"));
 }
 
@@ -202,6 +199,18 @@ str getLines(loc f) {
 		ll +=l;
 	}
 	return ll;
+}
+
+int getVolumeClones() {
+	clonesVolume = 0;
+	for (key <- cloneClasses ) {
+		for (c <- cloneClasses[key] ) {
+				b = c[0].begin.line;
+				e = c[0].end.line;
+				clonesVolume += (e-b);
+			}
+		}
+	return clonesVolume;
 }
 
 /* take it out
