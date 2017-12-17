@@ -14,29 +14,27 @@ import util::Math;
 import util::Editors;
 import util::Editors;
 import demo::common::Crawl;
-import Helper;
 import Main;
 import clones::Type1;
 import clones::Type2;
 import clones::Tools;
 
 loc selectedProj = toLocation("");
-map[loc, int] filesMap = ();
-bool rerun1 = false;
 lrel[loc, int] biggestClone;
 str biggestCloneClassKey;
 str biggestCloneKey;
+map[loc, int] filesMap = ();
+bool rerun1 = false;
 
 
 /* Main visualizer */
 public void visualize(bool run) {
-	//run1(project);
 	menuBox = box(getMenuFigure());
 	welcome = box(text("Welcome to series2 - Clone detection",  fontBold(true), fontSize(10)), fillColor("green"));
 	//guide   = box(text("Run on one of the projects"));
-	Figure topScreen = box(hcat([welcome/*, guide*/]), height(20), resizable(true, false));	
+	Figure topScreen = box(hcat([welcome/*, guide*/]), height(20), resizable(false, false));	
 	
-	if (selectedProj != toLocation("") && run == true){
+	if (selectedProj != toLocation("") && run == true){ // run needed with project selected
 		set[Declaration] asts = createAstsFromEclipseProject(selectedProj, true);
 		M3 model = createM3FromEclipseProject(selectedProj);
 		int vol = getVolume(model);
@@ -46,6 +44,7 @@ public void visualize(bool run) {
 		fillFiles(asts);
 		
 		largestCloneBox = getCloneClassBox(biggestCloneKey);
+		
 		// render clones per file
 		fileClones = box(
 				vcat([
@@ -58,61 +57,87 @@ public void visualize(bool run) {
 				])
 			);
 		
-		mainPage = box(button("Main page", void(){visualize(false);},hsize(150), hgap(25), resizable(false, false)), left(), size(20), fillColor("white"), resizable(false,true));
-		mainPageBox = box(hcat([mainPage]), height(30), left(), resizable(true, false));
-		render("Welcome to series2 - Clone detection", vcat([/*topScreen, menuBox,*/ mainPageBox, fileClones]));
+		mainPage = box(button("Main page", void(){visualize(false);},hsize(150), hgap(25), resizable(false, false)), size(20), fillColor("white"), resizable(false,true));
+		mainPageBox = box(hcat([mainPage]), height(30), resizable(true, false));
+		render("Welcome to series2 - Clone detection", vcat([mainPageBox, fileClones]));
 		
-		// render clone classes
+		// render clone classes, each box has all boxes of clones in that class
 		panel = box(text("Clone classes view", fontSize(20)), height(30), fillColor("azure"));
-		render("Clone classes view", vcat([mainPageBox , panel,hcat(getFigures())]));
-		//render("Clone classes view", hcat(getFigures()));
-	} else {
+		render("Clone classes view", vcat([mainPageBox, panel, hcat(getFigures())]));
+		
+	} 
+	else { // main screen, no run no project selected
 		render("Welcome to series2 - Clone detection", vcat([topScreen, menuBox]));
 	}
-	
-	/*b = cloneClasses[biggestCloneKey];
-	nodes = [];
-	count = 0;
-	for (c <- b) {
-		count += 1;
-		nodes += box(text(c[0]), id("A_" + toString(count)), size(50), fillColor("lightgreen"));
+}
+
+/* get main menu figure with buttons on it & actions follow button press */
+Figure getMenuFigure() {
+	return vcat([
+				combo([/*"sample1","sample2",*/"small","hs"], void(str s){getSelectedProject(s);}, center(), hsize(200), resizable(false, false)),
+				button("Visualize type1", void() {
+					run1(selectedProj);
+					visualize(true);
+				},
+				hsize(100), hgap(25), resizable(false, false)),
+				button("Visualize type2", void() {
+					run2(selectedProj);
+					visualize(true);
+				}, 
+				hsize(100), hgap(25), resizable(false, false))
+				], resizable(false, false));
+}
+
+/* determine project loc based on selected option in main menu */
+void getSelectedProject(str s) {
+	if (s == "small")
+		selectedProj = smallsql;
+	else if (s == "hs")
+		selectedProj = hsqldb;
+	/*else if (s == "sample1")
+		selectedProj = sample1;
+	else if (s == "sample2")
+		selectedProj = sample2;*/
+}
+
+/* get clone classes figures */
+list[Figure] getFigures() {
+	figureList = [];
+	for (key <- cloneClasses) {
+		figureList += getCloneClassBox(key);
 	}
-	
-	edges = []; 
-	render(graph(nodes, edges, hint("layered"), gap(100)));*/
-	
-	/*render(box(
-				vcat([
-					box(text("Clone detection - clones per java file", fontSize(10)), fontBold(true), fillColor("white")),
-					box(text("Volume after global clean up: <vol> \t\t\t\tDuplication percentage: <vol>\t\t\t\t Clone classes: <size(cloneClasses)>",fontBold(true),left()),vshrink(0.05)),
-					box(text("Largest detected clone & size: <biggestClone> \t\t\t<max>",fontBold(true),left()),vshrink(0.05)),
-					computeFigure(reruntype1, getFigure, [grow(1)])
-				])
-			)
-	);*/
+	return figureList;
+}
+
+/* get clone figure for clone classes view */
+Figure getCloneBox(loc f){
+	fileName = f.file;
+	cloneBox = box(
+					text("<fileName>", fontSize(10)),
+					resizable(true, false),
+					hint("<f.begin.line> .. <f.end.line>"),
+					fillColor("azure"),
+					onMouseDown(bool (int butnr, map[KeyModifier,bool] modifiers){ // opens clone in the java file
+						edit(f);
+						return true;
+					}
+				));
+	return cloneBox;
+}
+
+/* get clone class view */
+Figure getCloneClassBox(str key) {
+	list[Figure] boxes = [];
+	for (c <- cloneClasses[key]) {
+		fileName = |<c[0].scheme>://<c[0].authority><c[0].path>|.file;
+		cloneBox = getCloneBox(c[0]); // get clone box in that class
+		boxes += cloneBox; // add box to other boxes
+	}
+	return box(vcat(boxes)); // form box by stacking clones boxes vertically
 }
 
 
-
-/* calculate volume based on files in java project */
-int countLoc(loc f) {
-		//cleaning
-		ls	= readFileLines(f);
-		ls -= getBlankLines(ls);
-		ls -= getMLComments(ls);
-		ls -= getSLComments(ls);
-		ls -= getPackages(ls);
-		ls -= getImports(ls);
-		ls -= getBlankLines(ls);
-		list[str] lines = [];
-		for (l <- ls) {
-			lines += trim(l);
-		}
-		return size(lines);
-}
-
-int getVolume(M3 model)   = (0 | it + countLoc(f) | f <- files(model));
-
+/* get size of biggest cloned code */
 int getBiggerClone() {
 	int max = 0;
 	for (key <- cloneClasses) {
@@ -127,6 +152,7 @@ int getBiggerClone() {
 	return max;
 }
 
+/* get biggest clone class (in term of number of locations */
 int getBiggestCloneClass() {
 	int max = 0;
 	int count;
@@ -143,34 +169,22 @@ int getBiggestCloneClass() {
 	return max;
 }
 
-bool reruntype1() {
-	if (rerun1) {
-		rerun1 = false;
-		return true;
-	} 
-	return false;
-}
 
-
+/* get clones per file figures */
 Figure getFigure() {
 	properties = [];
 	M3 model = createM3FromEclipseProject(selectedProj);
 	str lines;
-	//str linesIndex;
 	map[loc,str] cloneLinesPerFile = ();
-	//str fileName = "";
 	for (file <- filesMap) {
 		markers = [];
 		for (key <- cloneClasses ) {
 			lines = "";
-			//linesIndex = "";
-			//fileName = "";
 			for (c <- cloneClasses[key] ) {
 				if (file == |<c[0].scheme>://<c[0].authority><c[0].path>|) {
 					b = c[0].begin.line;
 					e = c[0].end.line;
 					lines = getLines(c[0]);
-					//linesIndex += " <b>..<e>\t";
 					if(cloneLinesPerFile[file]?) {
 						if (!contains(cloneLinesPerFile[file], "<b>..<e>"))
 							cloneLinesPerFile[file] += " <b>..<e>,";
@@ -178,8 +192,7 @@ Figure getFigure() {
 						cloneLinesPerFile[file] = " <b>..<e>,";
 					}
 					
-					//fileName = c[0].file;
-					for (l <- [b+1..e-1] ) {
+					for (l <- [b+1..e-1]) {
 						markers += info(l,"<b>..<e>\t");
 					}
 				}
@@ -192,7 +205,15 @@ Figure getFigure() {
 	return box(hcat(properties), fillColor("azure"));
 }
 
-str getLines(loc f) {
+bool reruntype1() { // needed for the computeFigure
+	if (rerun1) {
+		rerun1 = false;
+		return true;
+	} 
+	return false;
+}
+
+str getLines(loc f) { // not used anymore
 	str ll = "";
 	list[str] ls = readFileLines(f);
 	for (l <-ls) {
@@ -201,41 +222,15 @@ str getLines(loc f) {
 	return ll;
 }
 
-int getVolumeClones() {
-	clonesVolume = 0;
-	for (key <- cloneClasses ) {
-		for (c <- cloneClasses[key] ) {
-				b = c[0].begin.line;
-				e = c[0].end.line;
-				clonesVolume += (e-b);
-			}
-		}
-	return clonesVolume;
-}
 
-/* take it out
-int getVolumeClones() {
-	int count = 0;
-	int cc;
-	for (key <- cloneClasses) {
-		cc = 0;
-		for (c <- cloneClasses[key]) {
-			cc = c[1];
-			break;
-		}
-		count += cc;
-	}
-	return count;
-}*/
-
-
+/* get message for clones per file */
 FProperty message(str s, str ins){
 	return { 
 		onMouseOver(box(text(s+ins), fillColor("white"), grow(0.2), resizable(false)));
   	}
 }
 
-
+/* fill files map / size per file */
 void fillFiles(set[Declaration] asts) {
 	filesMap = ();
 	
@@ -253,68 +248,35 @@ void fillFiles(set[Declaration] asts) {
 }
 
 
-Figure getMenuFigure() {
-	return vcat([
-				combo(["sample1","sample2","small","hs"], void(str s){getSelectedProject(s);}, center(), hsize(200), resizable(false, false)),
-				button("Visualize type1", void() {
-				run1(selectedProj);
-				visualize(true);
-				},
-				hsize(100), hgap(25), resizable(false, false)),
-				button("Visualize type2", void() {
-				run2(selectedProj);
-				visualize(true);
-				}, 
-				hsize(100), hgap(25), resizable(false, false))
-				], resizable(false, false));
+/* calculate loc of a clean java file */
+int countLoc(loc f) {
+	//cleaning
+	ls	= readFileLines(f);
+	ls -= getBlankLines(ls);
+	ls -= getMLComments(ls);
+	ls -= getSLComments(ls);
+	ls -= getPackages(ls);
+	ls -= getImports(ls);
+	ls -= getBlankLines(ls);
+	list[str] lines = [];
+	for (l <- ls) {
+		lines += trim(l);
+	}
+	return size(lines);
 }
 
-void getSelectedProject(str s) {
-	if (s == "small")
-		selectedProj = smallsql;
-	else if (s == "hs")
-		selectedProj = hsqldb;
-	/*else if (s == "sample1")
-		selectedProj = sample1;
-	else if (s == "sample2")
-		selectedProj = sample2;*/
-}
+/* calculate volume based on files in java project */
+int getVolume(M3 model)   = (0 | it + countLoc(f) | f <- files(model));
 
-
-
-list[Figure] getFigures() {
-	figureList = [];
-	
-	for (file <- filesMap) {
-		markers = [];
-		for (key <- cloneClasses) {
-			figureList += getCloneClassBox(key);
+/* get loc cloned, works for all clone types */
+int getVolumeClones() {
+	clonesVolume = 0;
+	for (key <- cloneClasses ) {
+		for (c <- cloneClasses[key] ) {
+				b = c[0].begin.line;
+				e = c[0].end.line;
+				clonesVolume += (e-b);
+			}
 		}
-	}
-	return figureList;
-}
-
-Figure getCloneBox(loc f){
-	fileName = f.file;
-	cloneBox = box(
-					text("<fileName>", fontSize(10)),
-					resizable(true, false),
-					hint("<f.begin.line> .. <f.end.line>"),
-					fillColor("azure"),
-					onMouseDown(bool (int butnr, map[KeyModifier,bool] modifiers)	{
-						edit(f);
-						return true;
-					}
-				));
-	return cloneBox;
-}
-
-Figure getCloneClassBox(str key) {
-	list[Figure] boxes = [];
-	for (c <- cloneClasses[key]) {
-		fileName = |<c[0].scheme>://<c[0].authority><c[0].path>|.file;
-		cloneBox = getCloneBox(c[0]);
-		boxes += cloneBox;
-	}
-	return box(vcat(boxes));
+	return clonesVolume;
 }

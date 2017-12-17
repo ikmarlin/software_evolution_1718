@@ -12,7 +12,7 @@ import Node;
 import Main;
 import clones::Type1;
 
-
+/* main method to detect & store clone classes in java project */
 void run2(loc project) {
 	println("Type2");
 	storage = ();
@@ -22,6 +22,7 @@ void run2(loc project) {
 	println("Storage size = <size(storage)>");
 }
 
+/* gets clone classs from ast and post process them to get rid of subsumptions*/
 void getCloneClassesType2(set[Declaration] asts) {
 	// get initial classes
 	getInitialCloneClassesType2(asts);
@@ -42,47 +43,19 @@ void getInitialCloneClassesType2(set[Declaration] asts) {
 }
 
 
-// normalize subtree
+// normalize subtree for type2, variables names, times and identifiers not to be compared */
 node convert(node subtree) {
 	return visit(subtree){
     	case \simpleName(_) => \simpleName("simple") // skip details
     	case \variable(_,ext) => \variable("var",ext) // var name is not important
 	    case \variable(_,ext,i) => \variable("var",ext,i) // var name is not important
-		case \variables(t,frgs) => variables(t,frgs)
+		//case \variables(t,frgs) => variables(t,frgs) // no need, type will go in last branch
 		case \method(t,_,ps,es,impl) => \method(t,"unit",ps,es,impl) // we don't care about type & name
 		case \method(t,_,list[Declaration] ps,list[Expression] es) => \method(t,"unit",ps,es) // we don't care about type & name
    		case \parameter(t, _,ext) => \parameter(t,"parameter",ext)
    		case Modifier _ => \private()
-   		case Type _ => wildcard()
+   		case Type _ => wildcard() // will catch all types including the ones in subtrees above and normalize them!
 	}
 }
 
-/* obsolete code, it takes more than what the definition points to - probably as a second demo!
-node convert(node subtree) {
-	return visit(subtree) {
-	    case \variable(_,ext) => \variable("var",ext) // var name is not important
-	    case \variable(_,ext,i) => \variable("var",ext,i) // var name is not important
-    	case \simpleName(_) => \simpleName("simple") // skip details
-    	case \stringLiteral(_) => \stringLiteral("str") // skip strval
-    	case \characterLiteral(_) => characterLiteral("char") // skip charval
-    	case \booleanLiteral(_) => \booleanLiteral(true) // skip boolval
-    	case \number(_) => \number("0") // skip val
-    	//case \annotationTypeMember(type,_) => \annotationTypeMember(type,"annotatedTypeMember")
-    	//case \annotationTypeMember(type,_,_) => \annotationTypeMember(type,"annotatedTypeMember"))
-		case \method(t,_,ps,es,impl) => \method(t,"unit",ps,es,impl)
-		//case \method(t,_,ps,es) => \method(t,"unit",ps,es)
-		case \method(Type t,str _,list[Declaration] ps,list[Expression] es) => \method(t,"unit",ps,es)
-        case \methodCall(isSuper,_,args) => \methodCall(isSuper,"methodCall",args)
-        case \methodCall(isSuper,receiver,_,arg) => \methodCall(isSuper,receiver,"methodCall",arg)
-		case \constructor(_,ps,exc, imp) => \constructor("constructor",ps,exc,imp)
-		case \fieldAccess(isSuper,ex,_) => \fieldAccess(isSuper,ex,"fieldAccess")
-   		case \fieldAccess(isSuper,_) => \fieldAccess(isSuper,"fieldAccess")
-   		case \parameter(t, _,ext) => \parameter(t,"parameter",ext)
-   		case \vararg(t, _) => \vararg(t,"vararg")
-   		case \interface(_,ext,imp,b) => \interface("interface",ext,imp,b)
-		case \class(_,ext,imp,b) => \class("class",ext,imp,b)
-   		case Modifier _ => \private()
-   		case Type _ => wildcard()
-	}
-}*/
 

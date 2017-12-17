@@ -1,4 +1,4 @@
-module tests::TestType1
+module Tests
 /**
  *
  * @author ighmelene.marlin, rasha.daoud
@@ -7,6 +7,7 @@ module tests::TestType1
 import Prelude;
 import Main;
 import clones::Type1;
+import clones::Type2;
 
 loc proj = |project://smallsql0.21_src_test|;
 
@@ -31,7 +32,7 @@ void runTest() {
 
 
 /* properties */
-bool hasSameSize(map[str, lrel[loc, int, bool]] storage) {
+bool hasSameSize(map[str, lrel[loc, int]] storage) {
 	bool isSameSize = true;
 	for (key <- storage) {
 		for (rel1 <- storage[key]) {
@@ -50,7 +51,7 @@ bool hasSameSize(map[str, lrel[loc, int, bool]] storage) {
 	return isSameSize;
 }
 
-bool correctClasses(map[str, lrel[loc, int, bool]] storage) {
+bool correctClasses(map[str, lrel[loc, int]] storage) {
 	bool isCorrectClasses = true;
 	for (key1 <- storage) {
 		for (key2 <- storage) {

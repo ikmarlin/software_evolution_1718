@@ -17,7 +17,7 @@ import Visualization;
 import clones::Type1;
 import clones::Type2;
 import clones::Tools;
-import tests::TestType1;
+import tests::Tests;
 
 alias pairs = rel[clone,clone];
 public pairs clonePairs = {};
@@ -56,10 +56,11 @@ void main(loc project) {
 		appendToFile((|project://Series2/output/|)+ type1,"\n\n\n");
 	}
 	
-	// testing
+	// testing1
 	//println(<hasSameSize(storage)>);
 	//println(<correctClasses(storage)>);
 	
+	/***************************************************************************************/
 	//type2
 	run2(project);
 	str type2 = getTimedFilename("Output_type2_");
@@ -75,4 +76,18 @@ void main(loc project) {
 		}
 		appendToFile((|project://Series2/output/|)+ type2,"\n\n\n");
 	}
+	
+	// testing2
+	//println(<hasSameSize(storage)>);
+	//println(<correctClasses(storage)>);
+	
+	
+	
+	/**********Visualizatio****************/
+	
+	/* it runs the visualizer for all types, main screen will show up, and here you go.
+	*  false because no project is selected yet, 
+	*it will turn into true when the user selects any project from the drop-down-list on main screen
+	*/
+	//visualize(false)
 }

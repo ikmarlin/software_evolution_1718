@@ -133,6 +133,8 @@ pairs filterClones() {
 
 
 /* 2- detecting type1 clone classes using AST -> series2 */
+
+/* main method to detect & store clone classes in java project */
 void run1(loc project) {
 	println("Type1");
 	storage = ();
@@ -142,6 +144,7 @@ void run1(loc project) {
 	println("Storage size = <size(storage)>");
 }
 
+/* gets clone classs from ast and post process them to get rid of subsumptions*/
 void getCloneClassesType1(set[Declaration] asts) {
 	// get initial classes
 	getInitialCloneClassesType1(asts);
@@ -204,7 +207,6 @@ void storeSubtreeWithLoc(node subtree) {
 		int begin = val.begin.line;
 		int end = val.end.line;
 		int length = end - begin;
-		//println("XXX= <length>");
 		
 	  	if (length < minLoc) {
 	        return;
