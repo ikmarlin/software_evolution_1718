@@ -52,10 +52,8 @@ bool isTextContained(str text1, str text2){
 	return contained;
 }
 
-bool isSubsumed(lrel[loc,int,bool] c1, lrel[loc,int,bool] c2) {
+bool isSubsumed(lrel[loc,int] c1, lrel[loc,int] c2) {
 	bool subsumed = true;
-	//tuple[loc,int,bool] x;
-	//tuple[loc,int,bool] y;
 	// scan all and compare positions for excluding strictly included classes
 	for(c22 <- c2){
 		for(c11 <- c1){

@@ -164,7 +164,6 @@ void getInitialCloneClassesType1(set[Declaration] asts) {
 			println("XXX = <key>");*/
         }
     }
-    println("clone classes before taking out strictly included clone classes = <size(cloneClasses)>");
 }
 
 void postProcessCloneClasses() {
@@ -214,9 +213,9 @@ void storeSubtreeWithLoc(node subtree) {
 	    subtree = unsetRec(subtree);
 	    key = toString(subtree);
 		if (storage[key]?) {
-			storage[key] += <val,length,false>;
+			storage[key] += <val,length>;
 		} else {
-			storage[key] = [<val,length,false>];
+			storage[key] = [<val,length>];
 		}
 	}
 }

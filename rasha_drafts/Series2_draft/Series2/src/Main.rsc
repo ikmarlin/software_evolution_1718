@@ -11,7 +11,6 @@ import List;
 import Relation;
 import Node;
 import DateTime;
-import ParseTree;
 import lang::java::jdt::m3::Core;
 import lang::java::jdt::m3::AST;
 import Visualization;
@@ -20,26 +19,26 @@ import clones::Type2;
 import clones::Tools;
 import tests::TestType1;
 
-
-alias tree = set[Declaration];
 alias pairs = rel[clone,clone];
 public pairs clonePairs = {};
 public int blockSize = 6;
 
-
-public map[str, lrel[loc, int, bool]] storage = ();
-public map[str, lrel[loc, int, bool]] cloneClasses = ();
+/* Series2 public variables */
+public map[str, lrel[loc, int]] storage = ();
+public map[str, lrel[loc, int]] cloneClasses = ();
 public int minLoc = 6; // min loc for statement to be considered as clone, change from 1 to 6 or suitable val
+public int perc = 0;
 
+/* functions to get time-stamp in output file name */
 str getTimedFilename(str basename) = basename + getTimeForFile();
-str getTimeForFile() = printDateTime(now(), "YYYYMMddHHmmssSSS");
+str getTimeForFile() = printDateTime(now(), "YYYYMMddHHmm");
 
 /* java projects of interest */
 public loc smallsql = |project://smallsql0.21_src/|;
 public loc hsqldb   = |project://hsqldb-2.3.1/|;
 
 
-
+/* Main function to run clone detection type 1 & 2 and testing */
 void main(loc project) {
 	//type1
 	run1(project);
@@ -77,13 +76,3 @@ void main(loc project) {
 		appendToFile((|project://Series2/output/|)+ type2,"\n\n\n");
 	}
 }
-
-/*
-//for testing, TODO remove it
-void extractClonesType1(loc project) {
-	pairs ps = getClonePairsUsingLinesBlock(project);
-	getCloneClassesUsingLinesBlock(ps);
-	appendToFile(|project://Series2/output/output|,ps);
-	run1(project);
-	run2(project);
-}*/
