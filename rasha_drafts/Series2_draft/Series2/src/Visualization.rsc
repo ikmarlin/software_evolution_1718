@@ -65,6 +65,8 @@ public void visualize(bool run) {
 		panel = box(text("Clone classes view", fontSize(20)), height(30), fillColor("azure"));
 		render("Clone classes view", vcat([mainPageBox, panel, hcat(getFigures())]));
 		
+		//getClonesGraph();
+		
 	} 
 	else { // main screen, no run no project selected
 		render("Welcome to series2 - Clone detection", vcat([topScreen, menuBox]));
@@ -271,8 +273,8 @@ int getVolume(M3 model)   = (0 | it + countLoc(f) | f <- files(model));
 /* get loc cloned, works for all clone types */
 int getVolumeClones() {
 	clonesVolume = 0;
-	for (key <- cloneClasses ) {
-		for (c <- cloneClasses[key] ) {
+	for (key <- cloneClasses) {
+		for (c <- cloneClasses[key]) {
 				b = c[0].begin.line;
 				e = c[0].end.line;
 				clonesVolume += (e-b);
@@ -280,3 +282,24 @@ int getVolumeClones() {
 		}
 	return clonesVolume;
 }
+
+void getClonesGraph() {
+	nodes = [];
+	edges = [];
+	for(key <- cloneClasses) {
+		set[loc] locs = {};
+		for (c <- cloneClasses[key]) {
+			locs += c[0];
+		}
+		for(l <- locs) {
+			nodes += box(text("<l.file> <l.begin.line> <l.end.line>"), id("<l.uri><l.begin.line><l.end.line>"));
+			for(ll <- locs) {
+				if(l.file != ll.file) {
+					edges +=edge("<l.uri><l.begin.line><l.end.line>", "<ll.uri><ll.begin.line><ll.end.line>");
+				}
+			}
+		}
+	}
+	render(graph(nodes, edges, hint("layered"), gap(20)));
+}
+
