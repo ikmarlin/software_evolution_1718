@@ -30,9 +30,9 @@ bool rerun1 = false;
 /* Main visualizer */
 public void visualize(bool run) {
 	menuBox = box(getMenuFigure());
-	welcome = box(text("Welcome to series2 - Clone detection tool type 1 & 2",  fontBold(true), height(30), fontSize(12)), fillColor("green"));
-	//guide   = box(text("Run on one of the projects"));
-	Figure topScreen = box(hcat([welcome/*, guide*/]), height(20), resizable(false, false));	
+	welcome = box(text("Welcome to series2 - Clone detection tool type 1 & 2",  fontBold(true), fontSize(12)), fillColor("azure"));
+	//guide   = box(text("Please select one of the following project:"));
+	Figure topScreen = box(hcat([welcome]), height(30), width(150), resizable(false, false));	
 	
 	if (selectedProj != toLocation("") && run == true){ // run needed with project selected
 		set[Declaration] asts = createAstsFromEclipseProject(selectedProj, true);
@@ -43,12 +43,9 @@ public void visualize(bool run) {
 		int biggestCloneClassSize = getBiggestCloneClass();
 		fillFiles(asts);
 		
-		largestCloneBox = getCloneClassBox(biggestCloneKey);
-		
 		// render clones per file
 		fileClones = box(
 				vcat([
-					//largestCloneBox,
 					box(text("Clone detection - clones per java file", fontSize(20)), fontBold(true), fillColor("white")),
 					box(text("Volume after global clean up: <vol> \t\t\t\tDuplication size: <clonesVolume>\t\t\t\t Clone classes: <size(cloneClasses)>",fontBold(true),left()),vshrink(0.05)),
 					box(text("Biggest clone class size: <biggestCloneClassSize>",fontBold(true),left()),vshrink(0.05)),
@@ -57,26 +54,39 @@ public void visualize(bool run) {
 				])
 			);
 		
-		mainPage = box(button("Main page", void(){visualize(false);},hsize(150), hgap(25), resizable(false, false)), size(20), fillColor("white"), resizable(false,true));
+		mainPage = box(button("Main page", void(){visualize(false);},hsize(130), hgap(25), resizable(false, false)), size(20), fillColor("white"), resizable(false,true));
 		mainPageBox = box(hcat([mainPage]), height(30), resizable(true, false));
 		render("Clones per file view", vcat([mainPageBox, fileClones]));
 		
 		// render clone classes, each box has all boxes of clones in that class
-		panel = box(text("Clone classes view", fontSize(20)), height(30), fillColor("azure"));
-		render("Clone classes view", vcat([mainPageBox, panel, hcat(getFigures())]));
+		panel = box(text("Clone classes view", fontSize(20)), height(10),fillColor("azure"));
+		render("Clone classes view", vcat([mainPageBox, panel, hcat(getFigures(), gap(10))]));
 		
-		//getClonesGraph();
+		// render biggest clone class
+		box1 = box(text("Biggest clone class", fontSize(20)), fontBold(true), fillColor("white"));
+		box2 = getCloneClassBox(biggestCloneClassKey);
+		largestCloneClassBox = hcat([box1, box2],height(30), shrink(0.3), resizable(false, false));
+		render("Biggest clone class", largestCloneClassBox);
+		
+		// render biggest clone 
+		box1 = box(text("Biggest clone", fontSize(20)), fontBold(true), fillColor("white"));
+		box2 = getCloneClassBox(biggestCloneKey);
+		largestCloneBox = hcat([box1, box2],height(30), shrink(0.3), resizable(false, false));
+		render("Biggest clone", largestCloneBox);
+		
+		// render example hasse graph
+		getClonesGraph();
 		
 	} 
 	else { // main screen, no run no project selected
-		render("Clone detection tool", vcat([topScreen, menuBox]));
+		render("Clone detection tool", vcat([topScreen/*, guide*/, menuBox]));
 	}
 }
 
 /* get main menu figure with buttons on it & actions follow button press */
 Figure getMenuFigure() {
 	return vcat([
-				combo([/*"sample1","sample2",*/"smallsql0.21_src","hsqldb-2.3.1"], void(str s){getSelectedProject(s);}, center(), hsize(400), resizable(false, false)),
+				combo([/*"sample1","sample2",*/"smallsql0.21_src project","hsqldb-2.3.1 project"], void(str s){getSelectedProject(s);}, center(), hsize(300), resizable(false, false)),
 				button("Visualize type1", void() {
 					run1(selectedProj);
 					visualize(true);
@@ -92,9 +102,9 @@ Figure getMenuFigure() {
 
 /* determine project loc based on selected option in main menu */
 void getSelectedProject(str s) {
-	if (s == "smallsql0.21_src")
+	if (s == "smallsql0.21_src project")
 		selectedProj = smallsql;
-	else if (s == "hsqldb-2.3.1")
+	else if (s == "hsqldb-2.3.1 project")
 		selectedProj = hsqldb;
 	/*else if (s == "sample1")
 		selectedProj = sample1;
@@ -289,20 +299,28 @@ int getVolumeClones() {
 void getClonesGraph() {
 	nodes = [];
 	edges = [];
+	int count = 0;
 	for(key <- cloneClasses) {
+		count += 1;
 		set[loc] locs = {};
 		for (c <- cloneClasses[key]) {
 			locs += c[0];
 		}
 		for(l <- locs) {
-			nodes += box(text("<l.file> <l.begin.line> <l.end.line>"), id("<l.uri><l.begin.line><l.end.line>"));
+			nodes += box(text("<l.file> <l.begin.line> <l.end.line>"), id("<l.uri><l.begin.line><l.end.line>"),fillColor("azure"),
+				onMouseDown(bool (int butnr, map[KeyModifier,bool] modifiers){ // opens clone in the java file
+				edit(l);
+					return true;
+					}));
 			for(ll <- locs) {
 				if(l.file != ll.file) {
 					edges +=edge("<l.uri><l.begin.line><l.end.line>", "<ll.uri><ll.begin.line><ll.end.line>");
 				}
 			}
 		}
+		//break;
+		if (count == 4)
+			render(graph(nodes, edges, hint("layered"), gap(20)));
 	}
-	render(graph(nodes, edges, hint("layered"), gap(20)));
 }
 

@@ -63,7 +63,7 @@ void main(loc project) {
 	//type2
 	run2(project);
 	str type2 = getTimedFilename("Output_type2_");
-	writeFile((|project://Series2/output/|)+ type2,"Output from analyzing clone classes of type2:\n");
+	writeFile((|project://Series2/output/|)+ type2,"Output from analyzing clone classes of type2:\n\n");
 	countClass = 0;
 	for (c <- storage ){
 		countClass += 1;
