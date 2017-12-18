@@ -26,7 +26,7 @@ public int blockSize = 6;
 /* Series2 public variables */
 public map[str, lrel[loc, int]] storage = ();
 public map[str, lrel[loc, int]] cloneClasses = ();
-public int minLoc = 6; // min loc for statement to be considered as clone, change from 1 to 6 or suitable val
+public int minLoc = 5; // min loc for statement to be considered as clone, change from 1 to 6 or suitable val
 public int perc = 0;
 
 /* functions to get time-stamp in output file name */
@@ -57,8 +57,7 @@ void main(loc project) {
 	}
 	
 	// testing1
-	//println(<hasSameSize(storage)>);
-	//println(<correctClasses(storage)>);
+	//runTest1();
 	
 	/***************************************************************************************/
 	//type2
@@ -78,8 +77,7 @@ void main(loc project) {
 	}
 	
 	// testing2
-	//println(<hasSameSize(storage)>);
-	//println(<correctClasses(storage)>);
+	//runTest2();
 	
 	
 	
@@ -89,5 +87,5 @@ void main(loc project) {
 	*  false because no project is selected yet, 
 	*it will turn into true when the user selects any project from the drop-down-list on main screen
 	*/
-	//visualize(false)
+	//visualize(false);
 }

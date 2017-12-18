@@ -12,6 +12,7 @@ import lang::java::jdt::m3::Core;
 import Node;
 import Main;
 import clones::Tools;
+import clones::Type2;
 
 alias clone = tuple[loc l, list[str] lines];
 alias clones = lrel[loc l, list[str] lines];
@@ -221,6 +222,5 @@ void storeSubtreeWithLoc(node subtree) {
 		}
 	}
 }
-
 
 /* end of 2- detecting type1 clone classes */

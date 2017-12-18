@@ -30,7 +30,7 @@ bool rerun1 = false;
 /* Main visualizer */
 public void visualize(bool run) {
 	menuBox = box(getMenuFigure());
-	welcome = box(text("Welcome to series2 - Clone detection",  fontBold(true), fontSize(10)), fillColor("green"));
+	welcome = box(text("Welcome to series2 - Clone detection tool type 1 & 2",  fontBold(true), height(30), fontSize(12)), fillColor("green"));
 	//guide   = box(text("Run on one of the projects"));
 	Figure topScreen = box(hcat([welcome/*, guide*/]), height(20), resizable(false, false));	
 	
@@ -59,7 +59,7 @@ public void visualize(bool run) {
 		
 		mainPage = box(button("Main page", void(){visualize(false);},hsize(150), hgap(25), resizable(false, false)), size(20), fillColor("white"), resizable(false,true));
 		mainPageBox = box(hcat([mainPage]), height(30), resizable(true, false));
-		render("Welcome to series2 - Clone detection", vcat([mainPageBox, fileClones]));
+		render("Clones per file view", vcat([mainPageBox, fileClones]));
 		
 		// render clone classes, each box has all boxes of clones in that class
 		panel = box(text("Clone classes view", fontSize(20)), height(30), fillColor("azure"));
@@ -69,14 +69,14 @@ public void visualize(bool run) {
 		
 	} 
 	else { // main screen, no run no project selected
-		render("Welcome to series2 - Clone detection", vcat([topScreen, menuBox]));
+		render("Clone detection tool", vcat([topScreen, menuBox]));
 	}
 }
 
 /* get main menu figure with buttons on it & actions follow button press */
 Figure getMenuFigure() {
 	return vcat([
-				combo([/*"sample1","sample2",*/"small","hs"], void(str s){getSelectedProject(s);}, center(), hsize(200), resizable(false, false)),
+				combo([/*"sample1","sample2",*/"smallsql0.21_src","hsqldb-2.3.1"], void(str s){getSelectedProject(s);}, center(), hsize(400), resizable(false, false)),
 				button("Visualize type1", void() {
 					run1(selectedProj);
 					visualize(true);
@@ -92,9 +92,9 @@ Figure getMenuFigure() {
 
 /* determine project loc based on selected option in main menu */
 void getSelectedProject(str s) {
-	if (s == "small")
+	if (s == "smallsql0.21_src")
 		selectedProj = smallsql;
-	else if (s == "hs")
+	else if (s == "hsqldb-2.3.1")
 		selectedProj = hsqldb;
 	/*else if (s == "sample1")
 		selectedProj = sample1;
@@ -177,6 +177,7 @@ Figure getFigure() {
 	properties = [];
 	M3 model = createM3FromEclipseProject(selectedProj);
 	str lines;
+	int max = 0;
 	map[loc,str] cloneLinesPerFile = ();
 	for (file <- filesMap) {
 		markers = [];
@@ -187,6 +188,8 @@ Figure getFigure() {
 					b = c[0].begin.line;
 					e = c[0].end.line;
 					lines = getLines(c[0]);
+					if (max < filesMap[file]) 
+						max = filesMap[file];
 					if(cloneLinesPerFile[file]?) {
 						if (!contains(cloneLinesPerFile[file], "<b>..<e>"))
 							cloneLinesPerFile[file] += " <b>..<e>,";
@@ -195,13 +198,13 @@ Figure getFigure() {
 					}
 					
 					for (l <- [b+1..e-1]) {
-						markers += info(l,"<b>..<e>\t");
+						markers += highlight(l,"<b>..<e>\t");
 					}
 				}
 			}
 		}
 		if (size(markers)>0) {
-			properties += outline(markers, filesMap[file], size(20,180), message("<file.file>", cloneLinesPerFile[file]));
+			properties += outline(markers, filesMap[file], size(20,(2*filesMap[file]*150)/max), message("<file.file>", cloneLinesPerFile[file]));
 		}
 	}
 	return box(hcat(properties), fillColor("azure"));
